@@ -582,6 +582,27 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   .q .qrow{grid-template-columns:minmax(0,1fr) auto;padding:12px 18px}
   .q .qrow > .chip{grid-column:1/-1}
 }
+
+/* Ask panel: roomier insets, calmer answer type */
+.v5 .ask{width:min(480px,100%)}
+.v5 .ask header{padding:22px 28px;border-bottom:1px solid var(--line)}
+.v5 .ask header h2{font-size:18px}
+.v5 .ask .body{padding:24px 28px 32px;gap:16px}
+.v5 .ask input{height:48px;padding:0 16px;font-size:14px}
+.v5 .sugg{gap:8px}
+.v5 .sugg button{padding:12px 16px;font-size:13.5px;line-height:1.4}
+.v5 .answer{padding:24px;gap:16px;margin-top:4px}
+.ans-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--ink3)}
+.ans-tag{background:var(--navy-soft);color:var(--navy-2);font-weight:500;border-radius:999px;padding:2px 10px}
+.ans-say{font-size:18px;font-weight:400;line-height:1.45;letter-spacing:-.01em;color:var(--ink);margin:0;text-wrap:pretty}
+.v5 .answer .bars{gap:12px;padding:16px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.v5 .answer .bars div{grid-template-columns:128px minmax(0,1fr) 44px;gap:14px;font-size:13px;color:var(--ink2)}
+.v5 .answer .bars div span:last-child{text-align:right;font-weight:500;color:var(--ink);font-variant-numeric:tabular-nums}
+.v5 .answer .trk{display:block;height:6px;border-radius:999px;background:rgba(22,33,58,.06);overflow:hidden}
+.v5 .answer .trk .b{display:block;height:100%;border-radius:999px}
+.ans-note{font-size:12px;line-height:1.5;color:var(--ink3);margin:0}
+.v5 .answer .row{gap:8px;margin-top:4px}
+@media (max-width:760px){.v5 .ask{border-radius:0}.v5 .ask header{padding:18px 20px}.v5 .ask .body{padding:20px}.v5 .answer{padding:20px}.v5 .answer .bars div{grid-template-columns:96px minmax(0,1fr) 40px;gap:10px}}
 </style>
 <div id="root"></div>
 
@@ -1490,11 +1511,11 @@ function Ask({initial, close}){
       {typed && !ans && <div className="notice stale sm" role="status"><span>This prototype can't answer typed questions; it only has answers for the suggested questions below. In the product, Ask would answer from your fleet's data and show its sources.</span></div>}
       {!ans && <div className="sugg"><span className="faint xs">Suggested from today's issues</span>{Object.entries(ANSWERS).map(([k,x])=><button key={k} onClick={()=>{setA(k);setTyped(false);setText(x.q)}}>{x.q}</button>)}</div>}
       {ans && <div className="answer">
-        <span className="faint xs">{ans.q}</span><span className="faint xs">Answer · {ans.scope}</span>
-        <p className="say s">{ans.say}</p>
-        <div className="bars">{ans.bars.map((b,i)=><div key={i}><span>{b[0]}</span><span className="b" style={{width:b[1]+"%",background:i?"var(--ink3)":"var(--accent)"}}/><span>{b[2]}</span></div>)}</div>
-        <p className="faint xs">{ans.note} Figures are illustrative.</p>
-        <div className="row"><button className="btn sm" onClick={close}>Done</button><button className="btn sm ghost" onClick={()=>{setA(null);setText("");ref.current&&ref.current.focus()}}>Ask something else</button></div>
+        <div className="ans-meta"><span className="ans-tag">Answer</span><span>{ans.scope}</span></div>
+        <p className="ans-say">{ans.say}</p>
+        <div className="bars">{ans.bars.map((b,i)=><div key={i}><span>{b[0]}</span><span className="trk"><span className="b" style={{width:b[1]+"%",background:i?"var(--ink3)":"var(--accent)"}}/></span><span>{b[2]}</span></div>)}</div>
+        <p className="ans-note">{ans.note} Figures are illustrative.</p>
+        <div className="row"><button className="btn sm primary" onClick={close}>Done</button><button className="btn sm ghost" onClick={()=>{setA(null);setText("");ref.current&&ref.current.focus()}}>Ask something else</button></div>
       </div>}
     </div>
   </aside></>;
