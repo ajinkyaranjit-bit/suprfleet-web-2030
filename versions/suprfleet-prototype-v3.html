@@ -1,0 +1,1221 @@
+<title>SuprFleet 2030 Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: narrow left rail · main working column · optional right Ask panel. Calm porcelain surface, cobalt for actions, serif only for the system's answers. */
+:root{
+  --paper:#F3F4F1; --surface:#FFFFFF; --sunk:#EEF0EC; --ink:#18212B; --ink2:#4D5966; --ink3:#7A8591; --line:#DDE1DB; --line2:#C9CEC7;
+  --accent:#2446C9; --accent-ink:#FFFFFF; --accent-soft:#E8EDFB;
+  --money:#11704A; --money-soft:#E3F2EA; --warn:#9A5800; --warn-soft:#FBF0DE; --crit:#B3261E; --crit-soft:#FBE8E6; --stale:#6A6F78; --stale-soft:#ECEDEF;
+  --f-ui:"Geist", "Segoe UI", system-ui, sans-serif; --f-say:"Newsreader", Georgia, "Times New Roman", serif;
+  --r-s:6px; --r-m:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#12161B; --surface:#1A2027; --sunk:#151A20; --ink:#E9ECEF; --ink2:#AEB6BF; --ink3:#808A95; --line:#2A323B; --line2:#3A434D;
+  --accent:#7D97FF; --accent-ink:#0E1424; --accent-soft:#1E2847; --money:#5CC995; --money-soft:#16312A; --warn:#F0B35A; --warn-soft:#352813;
+  --crit:#FF8A80; --crit-soft:#3A1A18; --stale:#A2A8B1; --stale-soft:#252B32; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#12161B; --surface:#1A2027; --sunk:#151A20; --ink:#E9ECEF; --ink2:#AEB6BF; --ink3:#808A95; --line:#2A323B; --line2:#3A434D;
+  --accent:#7D97FF; --accent-ink:#0E1424; --accent-soft:#1E2847; --money:#5CC995; --money-soft:#16312A; --warn:#F0B35A; --warn-soft:#352813;
+  --crit:#FF8A80; --crit-soft:#3A1A18; --stale:#A2A8B1; --stale-soft:#252B32; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font:14px/1.5 var(--f-ui);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:208px minmax(0,1fr);min-height:100%}
+.rail{border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;background:var(--paper)}
+.brand{font-weight:600;font-size:15px;padding:4px 10px 16px;display:flex;align-items:center;gap:8px}
+.brand i{width:18px;height:18px;border-radius:5px;background:var(--ink);display:inline-block;position:relative}
+.brand i::after{content:"";position:absolute;inset:5px;border-radius:2px;background:var(--paper)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;white-space:nowrap;padding:8px 10px;border-radius:var(--r-s);border:0;background:none;text-align:left;cursor:pointer;color:var(--ink2)}
+.nav:hover{background:var(--sunk);color:var(--ink)}
+.nav[aria-current="page"]{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:0 0 0 1px var(--line)}
+.count{font-size:12px;min-width:20px;text-align:center;padding:0 6px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-weight:600}
+.rail .who{margin-top:auto;padding:10px;font-size:12.5px;color:var(--ink3);border-top:1px solid var(--line)}
+.rail .who b{display:block;color:var(--ink);font-weight:500}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper);z-index:5}
+.crumbs{display:flex;gap:6px;align-items:center;color:var(--ink3);font-size:13px;min-width:0;flex-wrap:wrap}
+.crumbs button{border:0;background:none;padding:0;color:var(--ink2);cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line2)}
+.fresh{margin-left:auto;font-size:12.5px;color:var(--ink3);white-space:nowrap}
+.fresh.bad{color:var(--warn)}
+.askbtn{display:flex;align-items:center;gap:10px;border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:6px 8px 6px 14px;cursor:pointer;color:var(--ink2);min-width:220px}
+.askbtn kbd{font:12px var(--f-ui);border:1px solid var(--line);border-radius:5px;padding:0 6px;color:var(--ink3);margin-left:auto}
+.page{padding:26px 28px 120px;max-width:1120px;width:100%;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:22px} h2{font-size:17px} h3{font-size:15px}
+p{margin:0}
+.say{font-family:var(--f-say);font-weight:400;font-size:clamp(24px,2.6vw,32px);line-height:1.2;letter-spacing:-.01em;max-width:30ch;text-wrap:balance}
+.say.s{font-size:22px;max-width:40ch}
+.muted{color:var(--ink2)} .faint{color:var(--ink3)} .sm{font-size:13px} .xs{font-size:12px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px}
+@media (max-width:980px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel.flush{padding:0;gap:0}
+.panel .ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:16px 18px 10px}
+.btn{border:1px solid var(--line2);background:var(--surface);border-radius:var(--r-s);padding:8px 14px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--ink3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{border-color:transparent;background:none;color:var(--ink2);padding-inline:8px}
+.btn.ghost:hover{color:var(--ink);background:var(--sunk)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.link{border:0;background:none;padding:0;color:var(--accent);cursor:pointer;font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.crit{background:var(--crit-soft);color:var(--crit)} .chip.ok{background:var(--money-soft);color:var(--money)}
+.chip.stale{background:var(--stale-soft);color:var(--stale)} .chip.info{background:var(--accent-soft);color:var(--accent)} .chip.line{border:1px solid var(--line2);color:var(--ink2)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+
+/* Safety strip */
+.urgent{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--crit-soft);border:1px solid color-mix(in srgb,var(--crit) 35%,transparent);border-radius:var(--r-m);padding:12px 16px}
+.urgent .ic{width:28px;height:28px;border-radius:50%;background:var(--crit);color:#fff;display:grid;place-items:center;font-weight:700}
+@media (max-width:700px){.urgent{grid-template-columns:1fr}}
+
+/* Vitals */
+.vitals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r-m);background:var(--surface)}
+.vital{padding:14px 16px;display:flex;flex-direction:column;gap:2px;border-right:1px solid var(--line);min-width:0;text-align:left;background:none;border-top:0;border-bottom:0;border-left:0}
+.vital:last-child{border-right:0}
+.vital .k{font-size:12.5px;color:var(--ink3)}
+.vital .v{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.vital .d{font-size:12px;color:var(--ink2)}
+.vital.button{cursor:pointer} .vital.button:hover{background:var(--sunk)}
+.vital .v small{font-size:14px;color:var(--ink3);font-weight:500}
+@media (max-width:900px){.vitals{grid-template-columns:repeat(2,minmax(0,1fr))}.vital{border-bottom:1px solid var(--line)}}
+
+/* Lists */
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:14px 18px;border-top:1px solid var(--line);align-items:center;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;width:100%}
+.item.button{cursor:pointer} .item.button:hover{background:var(--sunk)}
+.item .t{font-weight:500}
+.item .m{font-size:13px;color:var(--ink2)}
+.item .n{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.item .n b{font-weight:600}
+.est{border-bottom:1px dashed currentColor}
+.mix{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink2)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+
+/* Tables */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--line);vertical-align:middle;font-size:13.5px}
+th{font-weight:500;color:var(--ink3);font-size:12.5px;border-top:0;padding-top:4px}
+tr.out td{color:var(--ink3);text-decoration:line-through;text-decoration-color:var(--line2)}
+tr.out td:last-child{text-decoration:none}
+
+/* Money receipt */
+.receipt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 20px;font-size:13.5px}
+.receipt .r{text-align:right}
+.receipt .tot{font-weight:600;border-top:1px solid var(--line);padding-top:6px}
+.figures{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r-m)}
+.fig{padding:12px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
+.fig:last-child{border-right:0}
+.fig .k{font-size:12.5px;color:var(--ink3)}
+.fig .v{font-size:20px;font-weight:600}
+.fig.pos .v{color:var(--money)}
+@media (max-width:800px){.figures{grid-template-columns:repeat(2,minmax(0,1fr))}.fig{border-bottom:1px solid var(--line)}}
+
+/* Evidence ledger: the signature element */
+.ledger{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r-m);background:var(--surface)}
+.lcol{padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--line);min-width:0}
+.lcol:last-child{border-right:0}
+.lcol h3{display:flex;gap:8px;align-items:center}
+.ev{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;font-size:13.5px}
+.ev .mk{width:18px;height:18px;border-radius:4px;display:grid;place-items:center;font-size:11px;font-weight:700;margin-top:1px}
+.mk.sup{background:var(--money-soft);color:var(--money)} .mk.mis{background:var(--stale-soft);color:var(--stale);border:1px dashed var(--stale)} .mk.alt{background:var(--warn-soft);color:var(--warn)}
+.ev .src{font-size:12px;color:var(--ink3)}
+.weight{display:inline-flex;gap:2px;vertical-align:middle;margin-left:4px}
+.weight i{width:6px;height:10px;border-radius:1px;background:var(--line2)}
+.weight i.on{background:var(--ink2)}
+@media (max-width:900px){.ledger{grid-template-columns:1fr}.lcol{border-right:0;border-bottom:1px solid var(--line)}}
+
+.notice{display:flex;gap:12px;align-items:flex-start;border-radius:var(--r-m);padding:12px 14px;font-size:13.5px}
+.notice.info{background:var(--accent-soft)} .notice.ok{background:var(--money-soft)} .notice.warn{background:var(--warn-soft)} .notice.crit{background:var(--crit-soft)} .notice.stale{background:var(--stale-soft)}
+.notice b{font-weight:600}
+
+/* Stepper */
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0}
+.step{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:3px solid var(--line);font-size:13px;color:var(--ink3);padding-right:10px}
+.step.done{border-color:var(--money);color:var(--ink)}
+.step.now{border-color:var(--accent);color:var(--ink)}
+.step.fail{border-color:var(--crit);color:var(--ink)}
+.step b{font-weight:600;font-size:13.5px}
+@media (max-width:760px){.steps{grid-template-columns:1fr 1fr}}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:var(--r-s);overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 12px;cursor:pointer;font-size:13px;color:var(--ink2);border-right:1px solid var(--line2)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+
+/* Rule builder */
+.rule{font-size:16px;line-height:2.1;max-width:62ch}
+.tok{display:inline-block;border:1px solid var(--line2);background:var(--sunk);border-radius:6px;padding:0 8px;line-height:1.7;font-weight:500}
+.tok.lock{border-style:dashed;color:var(--ink3);background:none}
+.hist{display:grid;grid-template-columns:repeat(26,1fr);gap:3px;align-items:end;height:56px}
+.hist i{display:block;border-radius:2px;background:var(--line)}
+.hist i.m{background:var(--money)} .hist i.r{background:var(--warn)} .hist i.x{background:var(--stale);opacity:.6}
+
+/* Skeleton */
+.sk{background:linear-gradient(90deg,var(--sunk),var(--line),var(--sunk));background-size:200% 100%;animation:sh 1.4s linear infinite;border-radius:6px}
+@keyframes sh{to{background-position:-200% 0}}
+@media (prefers-reduced-motion: reduce){.sk{animation:none}}
+
+/* Ask panel */
+.scrim{position:fixed;inset:0;background:rgba(10,14,20,.28);z-index:20}
+.ask{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);border-left:1px solid var(--line);z-index:21;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.ask header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
+.ask .body{padding:18px;display:flex;flex-direction:column;gap:14px;overflow:auto;flex:1}
+.ask input{width:100%;border:1px solid var(--line2);border-radius:var(--r-s);padding:10px 12px;background:var(--paper);color:var(--ink);font:inherit}
+.sugg{display:flex;flex-direction:column;gap:6px}
+.sugg button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-s);padding:9px 12px;cursor:pointer}
+.sugg button:hover{border-color:var(--ink3)}
+.answer{border:1px solid var(--line);border-radius:var(--r-m);padding:14px;display:flex;flex-direction:column;gap:10px}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bars div{display:grid;grid-template-columns:120px minmax(0,1fr) 56px;gap:8px;align-items:center;font-size:12.5px}
+.bars span.b{height:8px;border-radius:4px;background:var(--accent)}
+
+/* Prototype controls (not product UI) */
+.demo{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:15;background:var(--ink);color:var(--paper);border-radius:12px;padding:8px;display:flex;gap:6px;align-items:center;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;max-width:calc(100% - 24px);box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.demo .lbl{font-size:12px;opacity:.7;padding:0 6px}
+.demo button{border:0;background:transparent;color:inherit;border-radius:7px;padding:6px 9px;cursor:pointer;font-size:12.5px;opacity:.82}
+.demo button:hover{opacity:1;background:rgba(255,255,255,.08)}
+.demo button[aria-pressed="true"]{background:var(--paper);color:var(--ink);opacity:1}
+.demo select{background:transparent;color:inherit;border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:5px 6px;font:12.5px var(--f-ui)}
+.demo select option{color:#111}
+.demo .sep{width:1px;height:20px;background:rgba(255,255,255,.2)}
+
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;z-index:30;font-size:13.5px}
+.modal{position:fixed;inset:0;display:grid;place-items:center;z-index:25;padding:16px}
+.modal .box{background:var(--surface);border-radius:12px;border:1px solid var(--line);max-width:520px;width:100%;padding:20px;display:flex;flex-direction:column;gap:14px}
+.radio{display:flex;flex-direction:column;gap:6px}
+.radio label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--r-s);padding:10px 12px;cursor:pointer}
+.radio input{margin-top:3px}
+textarea{width:100%;min-height:64px;border:1px solid var(--line2);border-radius:var(--r-s);padding:8px 10px;background:var(--paper);color:var(--ink);font:inherit}
+
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  .rail{position:static;height:auto;flex-direction:row;overflow-x:auto;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line)}
+  .brand{padding:4px 8px}
+  .rail .who{display:none}
+  .top{padding:12px 16px;flex-wrap:wrap}
+  .askbtn{min-width:0;flex:1 1 100%;white-space:nowrap}
+  .askbtn kbd{display:none}
+  .crumbs{flex:1 1 100%}
+  .fresh{margin-left:0;white-space:normal}
+  .page{padding:20px 16px 160px}
+}
+</style>
+
+<style>
+/* v2 additions: morning readiness, cases, handover, honest states */
+.grid2{align-items:start}
+.head{display:flex;flex-direction:column;gap:10px}
+.head .when{font-size:13px;color:var(--ink2)}
+.head .sub{color:var(--ink2);max-width:68ch}
+.ready{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:18px;display:flex;flex-direction:column;gap:16px}
+.rrow{display:grid;grid-template-columns:170px minmax(0,1fr) auto;gap:16px;align-items:center}
+.rrow .lbl b{display:block;font-weight:600}
+.rrow .lbl span{font-size:12.5px;color:var(--ink3)}
+.rbar{display:flex;height:12px;gap:2px;border-radius:4px;overflow:hidden;background:var(--surface)}
+.rbar span{display:block;height:100%}
+.rcounts{display:flex;gap:16px;font-size:13px;white-space:nowrap}
+.rcounts span{display:inline-flex;gap:6px;align-items:center}
+.rcounts b{font-weight:600}
+.sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+.sw.r{background:var(--money)} .sw.a{background:var(--warn)} .sw.u{background:repeating-linear-gradient(45deg,var(--stale) 0 2px,var(--stale-soft) 2px 4px);border:1px solid var(--stale)}
+.rbar .r{background:var(--money)} .rbar .a{background:var(--warn)} .rbar .u{background:repeating-linear-gradient(45deg,var(--stale) 0 3px,var(--stale-soft) 3px 6px)}
+@media (max-width:760px){.rrow{grid-template-columns:1fr}.rcounts{flex-wrap:wrap}}
+.case{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.case.crit{border-left:3px solid var(--crit)}
+.case.warn{border-left:3px solid var(--warn)}
+.case h3{font-size:16px}
+.meta{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--ink2)}
+.detail{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:10px}
+.hrow{padding:12px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.hrow:first-of-type{border-top:0}
+.hrow .top2{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+details.fold > summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+details.fold > summary::-webkit-details-marker{display:none}
+details.fold > summary::after{content:"Show";font-size:13px;color:var(--accent);font-weight:500}
+details.fold[open] > summary::after{content:"Hide"}
+.secthead{display:flex;flex-direction:column;gap:2px}
+.secthead p{font-size:13px;color:var(--ink2)}
+.conclusion{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:16px 18px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.conclusion .k{font-size:12.5px;color:var(--ink3)}
+@media (max-width:760px){.conclusion{grid-template-columns:1fr}}
+.str{font-size:12px;color:var(--ink3)}
+.kv{display:grid;grid-template-columns:120px minmax(0,1fr);gap:8px 14px;font-size:13.5px;align-items:start}
+.kv dt{color:var(--ink3)} .kv dd{margin:0}
+.vt{width:100%;min-width:0;font-size:13px}
+.vt td,.vt th{padding:8px 10px}
+.out-note{font-size:12px;color:var(--ink3)}
+.btn.oos{border-style:dashed;color:var(--ink3)}
+.footnote{font-size:12px;color:var(--ink3);border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:760px){
+  .item{grid-template-columns:1fr}
+  .item .n{align-items:flex-start;text-align:left;flex-direction:row;gap:10px;flex-wrap:wrap}
+}
+</style>
+<style>
+/* v3 additions */
+.tl{display:flex;flex-direction:column;gap:0;border-left:2px solid var(--line);margin-left:6px}
+.tl div{position:relative;padding:0 0 10px 16px;font-size:13px}
+.tl div::before{content:"";position:absolute;left:-6px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--ink3)}
+.tl div.ok::before{border-color:var(--money);background:var(--money)}
+.tl div.miss::before{border-color:var(--crit)}
+.tl b{font-weight:600}
+.tl .t{color:var(--ink3);margin-right:6px}
+.req{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) auto;gap:6px 14px;font-size:13px;align-items:center}
+.req .h{color:var(--ink3);font-size:12px}
+.slotrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:10px 18px;border-top:1px solid var(--line);align-items:center}
+.slotrow .acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+@media (max-width:760px){.slotrow{grid-template-columns:1fr}.slotrow .acts{justify-content:flex-start}.req{grid-template-columns:1fr}}
+.demo .reset{border:1px solid rgba(255,255,255,.3)}
+</style>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.25.6/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const {useState, useEffect, useRef} = React;
+
+/* =====================================================================
+   ONE SHARED SCENARIO (all figures illustrative)
+   Konkan Infra Services delivers construction materials with 260 trucks and keeps
+   power running at 38 construction sites (120 generators, 80 inverters/batteries,
+   40 solar charging stations). Today is Thursday 8 October 2026, 08:40.
+   ===================================================================== */
+const COMPANY = "Konkan Infra Services";
+
+/* Maintenance model */
+const P_BEFORE = 0.45, P_AFTER = 0.08;          // illustrative assumptions
+const REPAIR = 38000, DAY_REV = 8000, DAYS_OFF = 2;
+const FAIL_COST = REPAIR + DAY_REV*DAYS_OFF;    // ₹54,000
+const PLANNED_REV = 1000;                       // 4 h in a low-demand window
+
+/* Fuel model */
+const FUEL = {sites:"12, 19 and 27", litresPerSite:150, siteCount:3, price:94, delivery:2500};
+FUEL.litres = FUEL.litresPerSite*FUEL.siteCount;            // 450 L
+FUEL.fuelCost = FUEL.litres*FUEL.price;                     // ₹42,300
+FUEL.total = FUEL.fuelCost + FUEL.delivery;                 // ₹44,800
+
+/* Freshness policy */
+const FRESH = [
+  {step:"Evidence for a maintenance proposal", need:"Trend data from the last 30 days; latest reading under 48 h old"},
+  {step:"Booking a service slot", need:"Truck location and status under 3 h old, or a dispatch confirmation"},
+  {step:"Counting a commitment as ready today", need:"Asset, operator and schedule confirmed within the last hour"},
+];
+
+const TRUCKS = [
+  {id:"MH12-RT-4471", route:"Chakan → Nashik",   sig:"Strong",   seen:"08:31", age:0,  multi:true,  ghat:true,  load:true,  over:true,  depot:"Chakan"},
+  {id:"MH04-KL-2210", route:"Bhiwandi → Kasara", sig:"Moderate", seen:"26 h ago", age:26, multi:true, ghat:true, load:false, over:true, depot:"Bhiwandi"},
+  {id:"MH43-BG-9012", route:"Bhiwandi → Nashik", sig:"Strong",   seen:"08:36", age:0,  multi:true,  ghat:true,  load:true,  over:false, depot:"Bhiwandi"},
+  {id:"MH12-TQ-1187", route:"Chakan → Bhiwandi", sig:"Strong",   seen:"08:38", age:0,  multi:false, ghat:false, load:true,  over:false, depot:"Chakan"},
+  {id:"MH15-HX-3301", route:"Nashik → Bhiwandi", sig:"Moderate", seen:"08:12", age:0,  multi:true,  ghat:true,  load:true,  over:true,  depot:"Nashik"},
+  {id:"MH04-JP-7754", route:"Bhiwandi → Kasara", sig:"Strong",   seen:"08:40", age:0,  multi:true,  ghat:true,  load:false, over:true,  depot:"Bhiwandi"},
+  {id:"MH12-SV-6620", route:"Chakan → Nashik",   sig:"Moderate", seen:"08:29", age:0,  multi:true,  ghat:false, load:true,  over:false, depot:"Chakan"},
+  {id:"MH43-CE-0458", route:"Bhiwandi → Kasara", sig:"Strong",   seen:"08:35", age:0,  multi:false, ghat:true,  load:true,  over:true,  depot:"Bhiwandi"},
+  {id:"MH15-NA-2246", route:"Nashik → Chakan",   sig:"Strong",   seen:"08:22", age:0,  multi:true,  ghat:false, load:false, over:true,  depot:"Nashik"},
+  {id:"MH04-WD-8890", route:"Bhiwandi → Kasara", sig:"Moderate", seen:"07:58", age:1,  multi:true,  ghat:true,  load:true,  over:false, depot:"Bhiwandi"},
+];
+const DAYS = {9:"Fri 9 Oct",10:"Sat 10 Oct",11:"Sun 11 Oct",12:"Mon 12 Oct",13:"Tue 13 Oct",14:"Wed 14 Oct",15:"Thu 15 Oct",16:"Fri 16 Oct"};
+const slotLabel = s => s ? `${DAYS[s[0]]}, ${String(s[1]).padStart(2,"0")}:00` : "No slot";
+const VENDORS = [
+  {id:"sai", name:"Sai Auto Works", loc:"Bhiwandi", price:5000, rating:"4.6 · 41 jobs with you",
+   slots:{"MH12-RT-4471":[9,14],"MH04-KL-2210":[10,9],"MH43-BG-9012":[9,16],"MH12-TQ-1187":[10,11],"MH15-HX-3301":[11,9],"MH04-JP-7754":[11,11],"MH12-SV-6620":[12,9],"MH43-CE-0458":[12,11],"MH15-NA-2246":[13,9],"MH04-WD-8890":[13,11]}},
+  {id:"om", name:"Om Motors", loc:"Chakan", price:5400, rating:"4.4 · 12 jobs",
+   slots:{"MH12-RT-4471":[9,10],"MH04-KL-2210":[10,14],"MH43-BG-9012":[10,10],"MH12-TQ-1187":[9,12],"MH04-JP-7754":[11,14],"MH12-SV-6620":[12,14],"MH43-CE-0458":[13,10],"MH04-WD-8890":[13,14]}},
+  {id:"shree", name:"Shree Garage", loc:"Nashik", price:4700, rating:"4.1 · 5 jobs",
+   slots:{"MH12-RT-4471":[10,9],"MH12-TQ-1187":[11,10],"MH15-HX-3301":[9,15],"MH12-SV-6620":[12,10],"MH15-NA-2246":[12,15],"MH43-BG-9012":[13,9]}},
+];
+const MIX = [{k:"Trucks", n:260, c:"#2446C9"},{k:"Generators", n:120, c:"#11704A"},{k:"Inverters & batteries", n:80, c:"#9A5800"},{k:"Solar charging stations", n:40, c:"#7A5AB8"}];
+
+const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
+const lakh = n => "₹" + (n/100000).toFixed(2).replace(/0$/,"").replace(/\.$/,"") + " L";
+const fmtDate = d => d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});
+const plusDays = (octDay, n) => new Date(2026, 9, octDay + n);
+
+/* Plan figures derived only from the selected trucks */
+function figures(list){
+  const n = list.length, parts = n*5000, down = n*PLANNED_REV, cost = parts+down;
+  const before = n*P_BEFORE, after = n*P_AFTER, avoided = (before-after)*FAIL_COST;
+  return {n, parts, down, cost, before, after, avoided, net:avoided-cost, breakeven:Math.max(1,Math.ceil(cost/FAIL_COST-1e-9))};
+}
+function draft(S){
+  const list = TRUCKS.filter(t=>!S.excluded.has(t.id));
+  const f = figures(list);
+  const needsCheck = list.filter(t=> (S.mode==="stale" && t.depot==="Bhiwandi") || t.age>=3).map(t=>t.id);
+  return {...f, list, needsCheck,
+    multi:list.filter(t=>t.multi).length, ghat:list.filter(t=>t.ghat).length, noLoad:list.filter(t=>!t.load).length, over:list.filter(t=>t.over).length};
+}
+/* The plan everyone sees: the approved snapshot once approved, otherwise the draft */
+function shownPlan(S){ return S.approved ? S.approved : draft(S); }
+
+/* Readiness: commitments = truck departures + site-power commitments */
+function readiness(S){
+  const base = S.mode==="dense"
+    ? [{k:"Material deliveries", s:"truck departures", r:74, a:38, u:8},{k:"Site power", s:"construction sites", r:30, a:6, u:2}]
+    : S.mode==="stale"
+    ? [{k:"Material deliveries", s:"truck departures", r:92, a:8, u:20},{k:"Site power", s:"construction sites", r:33, a:3, u:2}]
+    : [{k:"Material deliveries", s:"truck departures", r:106, a:8, u:6},{k:"Site power", s:"construction sites", r:33, a:3, u:2}];
+  const tot = base.reduce((a,r)=>({r:a.r+r.r,a:a.a+r.a,u:a.u+r.u}),{r:0,a:0,u:0});
+  return {rows:base, tot, all:tot.r+tot.a+tot.u};
+}
+
+/* One source for decisions waiting for Vikram (drives the badge, Today and the decisions page) */
+function decisions(S){
+  if(S.mode==="empty"||S.mode==="loading") return {morning:[], week:[], groups:[]};
+  const clutchOpen = S.pstatus==="open";
+  if(S.mode==="dense"){
+    const groups = [
+      {id:"flood", done: S.reroute && S.cement}, {id:"grid", done: !!S.gridEscalated}, {id:"inv", done:false},
+      {id:"clutch", done:!clutchOpen}, {id:"permit", done:false}, {id:"coach", done:false}, {id:"dev", done:false}];
+    return {morning:[], week:[], groups: groups.filter(g=>!g.done)};
+  }
+  const morning = [!S.dispatchAssigned && {id:"dispatch"}, S.fuel==="none" && {id:"fuel"}].filter(Boolean);
+  const week = [clutchOpen && {id:"clutch"}, {id:"dg"}, {id:"solar"}].filter(Boolean);
+  return {morning, week, groups:[]};
+}
+const decisionCount = S => { const d=decisions(S); return S.mode==="dense" ? d.groups.length : d.morning.length + d.week.length; };
+
+/* Initial state (Reset and every state switch return here) */
+const INITIAL = () => ({
+  screen:"today", mode:"normal",
+  excluded:new Set(), pstatus:"open", approved:null, partial:null,
+  availReq:"none", vendor:"sai", partialOk:false, notify:true,
+  slots:{}, view:"now", vendorFailed:true, rebooked:null, failId:null,
+  dispatchAssigned:false, fuel:"none",
+  incident:{owner:"Arjun Nair", ownerRole:"duty manager", status:"open", called:false, notes:[], falseAlarm:null},
+  cleaning:"pending", reroute:false, cement:false, gridEscalated:false,
+  rules:[
+    {id:"clean", t:"Book panel cleaning under ₹5,000", m:"Solar stations · books and tells you", status:"On", limit:"₹5,000 (default)", excl:"Never on safety cases"},
+    {id:"idle", t:"Tell operators when idling passes 45 min", m:"Trucks · no cost", status:"On", limit:"₹0", excl:"Notifications only"},
+    {id:"temp", t:"Raise a ticket for inverter temperature alerts", m:"Inverters · no cost", status:"On", limit:"₹0", excl:"Tickets only"},
+    {id:"clutch", t:"Clutch and brake service, 3+ trucks of one model", m:"Trucks · not tested yet", status:"Draft", limit:"₹5,000 default (needs ₹50,000)", excl:"—"},
+  ],
+  activity:[
+    {time:"06:10", who:"Arjun Nair", what:"Depot guard checked MH12-AB-1234: tank cap seal broken, photo attached", why:"Fuel-loss investigation"},
+    {time:"02:35", who:"Arjun Nair", what:"Called operator Sanjay More", why:"No answer"},
+    {time:"02:29", who:"Arjun Nair", what:"Acknowledged fuel-loss case and took ownership", why:"Backup owner"},
+    {time:"02:27", who:"Rule", what:"Escalated fuel-loss case to Arjun Nair (duty manager)", why:"Sunita Rao didn't acknowledge within 15 min"},
+    {time:"02:12", who:"Rule", what:"Alerted Sunita Rao (Safety lead) by call and app", why:"Urgent safety alert"},
+    {time:"21:40", who:"Rule", what:"Sent idling notices to 4 operators at Bhiwandi", why:"Rule: idling over 45 min"},
+    {time:"20:05", who:"Rule", what:"Requested panel cleaning for SOL-07, ₹1,800", why:"Rule: cleaning under ₹5,000"},
+    {time:"18:30", who:"Rahul Patil", what:"Raised ticket for INV-022", why:"Temperature above limit"},
+  ],
+  clock:44,
+});
+
+/* ============ Small parts ============ */
+const Chip = ({tone="line", children}) => <span className={"chip "+tone}>{children}</span>;
+const OOS = ({children, toast, sm}) => <button className={"btn oos"+(sm?" sm":"")} title="Not built in this prototype" onClick={()=>toast("Not built in this prototype.")}>{children} <span className="faint xs">(not in prototype)</span></button>;
+
+function ReadyBar({row}){
+  const t=row.r+row.a+row.u;
+  return <div className="rrow">
+    <div className="lbl"><b>{row.k}</b><span>{t} {row.s} today</span></div>
+    <div className="rbar" role="img" aria-label={`${row.r} ready, ${row.a} at risk, ${row.u} unverified`}><span className="r" style={{flex:row.r}}/><span className="a" style={{flex:row.a}}/><span className="u" style={{flex:row.u}}/></div>
+    <div className="rcounts"><span><i className="sw r"/><b>{row.r}</b> ready</span><span><i className="sw a"/><b>{row.a}</b> at risk</span><span><i className="sw u"/><b>{row.u}</b> unverified</span></div>
+  </div>;
+}
+
+/* Accessible modal: focus moves in, Tab is trapped, Escape closes, focus returns */
+function Modal({title, onClose, children}){
+  const box = useRef(null);
+  useEffect(()=>{
+    const prev = document.activeElement;
+    const sel = 'button:not([disabled]),input:not([disabled]),select,textarea,[href]';
+    const first = box.current.querySelector(sel); first && first.focus();
+    const k = e=>{
+      if(e.key==="Escape"){ e.stopPropagation(); onClose(); }
+      if(e.key==="Tab"){ const f=[...box.current.querySelectorAll(sel)]; if(!f.length) return;
+        if(e.shiftKey && document.activeElement===f[0]){ e.preventDefault(); f[f.length-1].focus(); }
+        else if(!e.shiftKey && document.activeElement===f[f.length-1]){ e.preventDefault(); f[0].focus(); } }
+    };
+    document.addEventListener("keydown",k,true);
+    return ()=>{ document.removeEventListener("keydown",k,true); prev && prev.focus && prev.focus(); };
+  },[]);
+  return <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="scrim" onClick={onClose}/>
+    <div className="box" ref={box} style={{position:"relative",zIndex:26}}><h2 id="modal-title">{title}</h2>{children}</div></div>;
+}
+
+/* ============ Today ============ */
+function Today({S, A}){
+  if(S.mode==="loading") return <div className="page" aria-busy="true">
+    <div className="sk" style={{height:22,maxWidth:260}}/><div className="sk" style={{height:74,maxWidth:640}}/><div className="sk" style={{height:120}}/>
+    <div className="grid2"><div className="sk" style={{height:320}}/><div className="sk" style={{height:260}}/></div>
+    <p className="faint sm">Reading the latest data from 500 assets…</p></div>;
+  if(S.mode==="empty") return <div className="page">
+    <div className="head"><span className="when">Welcome, Vikram</span>
+    <p className="say s">312 of your 500 assets are reporting. We haven't assessed your fleet yet, so there's nothing to decide. That doesn't mean everything is fine.</p></div>
+    <div className="panel">
+      <h2>What you'll see, and what it needs</h2>
+      <div className="req">
+        <span className="h">What</span><span className="h">Needs</span><span className="h">Status</span>
+        <span>Asset health, faults, fuel and energy alerts</span><span className="muted">Telemetry from all 500 assets</span><Chip tone="info">About 20 min</Chip>
+        <span>Urgent safety alerts</span><span className="muted">Telemetry, plus who to alert at night</span><Chip tone="line">Set an owner</Chip>
+        <span>Delivery readiness</span><span className="muted">Today's dispatch plan and driver assignments</span><Chip tone="line">Not connected</Chip>
+        <span>Site-power readiness</span><span className="muted">Site schedules</span><Chip tone="line">Not connected</Chip>
+        <span>Maintenance proposals</span><span className="muted">30 days of data, plus service history for accuracy</span><Chip tone="line">From day 30</Chip>
+      </div>
+      <div className="row"><button className="btn primary" onClick={()=>A.go("rules")}>Set approval limit and alert owner</button><OOS toast={A.toast}>Connect dispatch plan</OOS></div>
+    </div>
+  </div>;
+
+  const R = readiness(S), dense = S.mode==="dense", stale = S.mode==="stale";
+  const inc = S.incident;
+  const handover = <div className="panel">
+    <details className="fold" open={!A.narrow}>
+      <summary><div className="secthead"><h2>Overnight handover</h2><p>Since 18:00 yesterday · what happened, who owns it</p></div></summary>
+      <div style={{marginTop:6}}>
+        <div className="hrow"><div className="top2"><b>Panel cleaning for SOL-07</b><Chip tone={S.cleaning==="cancelled"?"stale":"warn"}>{S.cleaning==="cancelled"?"Cancelled":"Waiting for vendor"}</Chip></div>
+          <span className="sm muted">Requested by your rule (cleaning under ₹5,000). ₹1,800. Owner: Meera Joshi, site power.</span>
+          {S.cleaning==="cancelled" ? <span className="sm">You cancelled it at {S.cleaningAt}, before the vendor confirmed. No charge.</span>
+            : <><span className="sm muted">Not confirmed yet (due by 10:00), so it can still be cancelled free.</span><div><button className="link sm" onClick={A.cancelCleaning}>Cancel booking</button></div></>}
+        </div>
+        <div className="hrow"><div className="top2"><b>Temperature ticket, INV-022</b><Chip tone="info">Open</Chip></div><span className="sm muted">Owner: Rahul Patil. Raised 18:30. Not resolved.</span></div>
+        <div className="hrow"><div className="top2"><b>Idling notices to 4 operators</b><Chip tone="line">Sent · 2 of 4 read</Chip></div><span className="sm muted">Bhiwandi. Whether idling actually dropped is checked tonight.</span></div>
+      </div>
+    </details>
+  </div>;
+
+  return <div className="page">
+    {stale && <div className="notice warn" role="status"><span><b>Data is 3 hours old for 140 assets at Bhiwandi</b> (network outage since 05:40). Their commitments count as unverified, not ready. Trucks there need a dispatch check before a service slot can be booked.</span></div>}
+    {S.mode==="failed" && <div className="notice crit"><span><b>1 action didn't go through.</b> A vendor cancelled a service slot. <button className="link" onClick={()=>A.go("track")}>See and rebook</button></span></div>}
+
+    <div className="head">
+      <span className="when">Thursday 8 October · 08:40 · {COMPANY}</span>
+      {dense
+        ? <p className="say">Flooding at Bhiwandi puts {R.tot.a} of today's {R.all} commitments at risk. One reroute covers 23 of them.</p>
+        : <p className="say">{R.tot.r} of today's {R.all} commitments are ready. {R.tot.a+R.tot.u} need attention before 10:00.</p>}
+      <p className="sub">{dense ? "27 trucks with deliveries today are stopped. 23 can reroute via Thane. 4 cement loads for site 12 can't wait and need a separate decision."
+        : `${R.rows[0].a} deliveries are short of a truck or driver, ${R.rows[1].a} sites are low on generator fuel, and ${R.tot.u} commitments can't be verified${stale?" because of the outage":""}.`}</p>
+    </div>
+
+    <section className="ready" aria-label="Today's readiness">
+      <div className="spread"><h2>Can today run as planned?</h2><span className="faint sm">Commitments = truck departures + sites that need power today. Ready = asset, operator and schedule confirmed in the last hour.</span></div>
+      {R.rows.map(r=><ReadyBar key={r.k} row={r}/>)}
+    </section>
+
+    <div className="grid2">
+      <div className="col" style={{gap:14}}>
+        <div className="secthead"><h2>Needs you this morning</h2><p>Safety first, then by deadline.</p></div>
+
+        <article className="case crit">
+          <div className="meta"><Chip tone="crit">{inc.status==="closed"?"Closed":"Open"} · owner {inc.owner}</Chip><span>Reported 02:10 · Chakan</span></div>
+          <h3>Unexplained fuel loss on MH12-AB-1234</h3>
+          <p className="muted sm">40 L lost while parked. Theft suspected, not confirmed. Sunita Rao didn't acknowledge within 15 min, so it moved to Arjun Nair (duty manager), who acknowledged at 02:29{inc.owner==="You"?` and handed it to you at ${inc.ownedAt}`:" and owns it now"}. The operator hasn't been reached; a depot guard found the tank seal broken at 06:10.</p>
+          <div className="row"><button className="btn" onClick={()=>A.go("theft")}>Review evidence and contact log</button>
+            {inc.owner!=="You" && inc.status!=="closed" && <button className="btn" onClick={A.takeOwnership}>Take ownership</button>}</div>
+        </article>
+
+        {dense ? <>
+        <article className="case warn">
+          <div className="meta"><Chip tone="warn">Decide by 11:00</Chip><span>Flooding · Bhiwandi</span></div>
+          <h3>Reroute 23 trucks via Thane</h3>
+          <p className="muted sm">23 deliveries to 8 sites. +₹18,000 fuel, about +1.5 h each.{S.reroute?" Approved; Priya Shah is sending routes. Still at risk until drivers confirm.":""}</p>
+          <div className="row"><button className="btn primary" onClick={()=>A.go("decisions")}>See all {decisionCount(S)} open decisions</button></div>
+        </article>
+        <article className="case warn">
+          <div className="meta"><Chip tone="warn">Decide by 10:30</Chip><span>Separate from the 23</span></div>
+          <h3>4 cement loads for site 12 can't wait for a reroute</h3>
+          <p className="muted sm">The pour starts at 12:00; a rerouted truck would arrive about 13:30. Owner: Kavita Rao, site 12 manager.</p>
+          <div className="row"><button className="btn" onClick={()=>A.go("decisions")}>See options</button></div>
+        </article></> : <>
+        <article className="case warn">
+          <div className="meta"><Chip tone="warn">Before 09:30</Chip><span>{R.rows[0].a} deliveries · dispatch</span></div>
+          <h3>{R.rows[0].a} deliveries are short of a truck or driver</h3>
+          <p className="muted sm">5 trucks failed their morning check and 3 drivers called in sick. 4 standby trucks are free at Bhiwandi.</p>
+          {S.dispatchAssigned
+            ? <div className="notice info sm"><span><b>Assigned to Priya Shah (dispatch lead) at {S.dispatchAt}.</b> 0 of 8 replacements confirmed. These stay "at risk" until she confirms each one.</span></div>
+            : <div className="row"><button className="btn primary" onClick={A.assignDispatch}>Assign to Priya Shah, dispatch</button></div>}
+        </article>
+
+        <article className="case warn">
+          <div className="meta"><Chip tone="warn">Before 10:00</Chip><span>{R.rows[1].a} sites · site power</span></div>
+          <h3>{R.rows[1].a} sites have less than 6 hours of generator fuel</h3>
+          <div className="receipt sm">
+            <span>Diesel: {FUEL.litresPerSite} L × {FUEL.siteCount} sites (about 18 more hours each)</span><span className="r">{FUEL.litres} L</span>
+            <span>At ₹{FUEL.price}/L (assumed price)</span><span className="r">{inr(FUEL.fuelCost)}</span>
+            <span>Tanker delivery charge</span><span className="r">{inr(FUEL.delivery)}</span>
+            <span className="tot">Total payment</span><span className="r tot">{inr(FUEL.total)}</span>
+          </div>
+          {S.fuel==="none"
+            ? <div className="row"><button className="btn primary" onClick={A.approveFuel}>Approve {inr(FUEL.total)} refuel</button><button className="btn ghost" onClick={()=>A.openAsk("fuel")}>Ask why</button></div>
+            : <div className="notice info sm"><span><b>Approved {inr(FUEL.total)} at {S.fuelAt}.</b> {S.fuel==="requested"?"Waiting for Bharat Fuels to confirm the tanker.":"Bharat Fuels confirmed: arriving about 11:30."} Owner: Meera Joshi. Sites {FUEL.sites} stay at risk until fuel sensors confirm the delivery.</span></div>}
+        </article>
+
+        <article className="case">
+          <div className="meta"><Chip tone="stale">Can't verify</Chip><span>{R.tot.u} commitments</span></div>
+          <h3>{R.tot.u} commitments have no fresh data</h3>
+          <p className="muted sm">{stale ? `${R.rows[0].u} departures (Bhiwandi network outage since 05:40) and ${R.rows[1].u} sites.` : `${R.rows[0].u} departures in the Kasara ghat low-network corridor and ${R.rows[1].u} sites whose generators went offline in a power cut at 04:00.`} Missing data doesn't mean an asset has stopped.</p>
+          <div className="row"><button className="link sm" onClick={()=>A.go("assets")}>See which ones</button></div>
+        </article></>}
+      </div>
+
+      <div className="col" style={{gap:14}}>
+        {handover}
+        {!dense && <div className="panel flush">
+          <div className="ph"><div className="secthead"><h2>Planned improvements</h2><p>This week. Not blocking today.</p></div></div>
+          {weekItems(S).map((d,i)=>
+            <button key={i} className="item button" onClick={()=>i===0?A.go(d.to):A.toast("Not built in this prototype.")}>
+              <div><div className="t">{d.t}</div><div className="m">{d.m}{i>0?" · details not in prototype":""}</div></div>
+              <div className="n"><b className="est">{d.v}</b><span className="faint xs">{d.when}</span></div>
+            </button>)}
+        </div>}
+      </div>
+    </div>
+    <p className="footnote">All figures are illustrative. Readiness assumes the dispatch plan and site schedules are connected. The decisions badge counts items waiting for your decision; safety incidents have their own owner and are shown separately.</p>
+  </div>;
+}
+function clutchLine(S){
+  const p = shownPlan(S);
+  const m = S.pstatus==="snoozed" ? "Snoozed until Mon 12 Oct" : S.pstatus==="dismissed" ? "You disagreed · won't return unless evidence changes"
+    : S.pstatus==="approved" ? (S.partial ? `Approved for ${p.n} trucks · ${S.partial} still need a slot` : `Approved for ${p.n} trucks · in progress`) : "Decide by Fri 9 Oct, 18:00 to use the quiet slots";
+  return {t:`Service ${p.n} trucks for early clutch wear`, m, v:`Est. ${lakh(p.net)} net benefit`, when:`Cost ${inr(p.cost)}`, to: S.pstatus==="approved"?"track":"proposal"};
+}
+function weekItems(S){
+  return [clutchLine(S),
+    {t:"Generator DG-118, Hinjewadi: fuel use up 18%", m:"Likely injector wear. Inspection ₹3,500", v:"Est. ₹22,000/mo", when:"Above rule limit"},
+    {t:"6 solar stations producing 14% below forecast", m:"Dust after the dry spell. Cleaning ₹12,000", v:"Est. ₹40,000/mo", when:"Vendor free Sat"}];
+}
+
+/* ============ Proposal ============ */
+function Proposal({S, A}){
+  const locked = !!S.approved;
+  const p = shownPlan(S);
+  const d = draft(S);
+  const [showWork, setShowWork] = useState(false);
+  return <div className="page">
+    <div className="spread">
+      <div className="col" style={{gap:8}}>
+        <div className="row">{S.pstatus==="snoozed"?<Chip tone="line">Snoozed until Mon 12 Oct</Chip>:S.pstatus==="dismissed"?<Chip tone="line">You disagreed</Chip>:locked?<Chip tone="info">Approved · plan locked</Chip>:<Chip tone="warn">Needs your decision</Chip>}<span className="faint sm">Decide by Fri 9 Oct, 18:00 to use this week's quiet slots</span></div>
+        <h1>Service {p.n} trucks for early clutch wear</h1>
+        <p className="muted" style={{maxWidth:"70ch"}}>These Tata Signa 4825 trucks show the clutch pattern seen in the 4 that broke down last quarter. A planned service in a low-demand window costs less than failures on the road.</p>
+      </div>
+      <button className="btn ghost" onClick={()=>A.openAsk("clutch")}>Ask about this</button>
+    </div>
+    {locked && <div className="notice info"><span><b>This plan was approved on Thu 8 Oct and is locked.</b> Changing trucks or vendor needs an amendment. <button className="link" onClick={()=>A.toast("Amendments aren't built in this prototype.")}>Start an amendment (not in prototype)</button></span></div>}
+
+    <div className="figures">
+      <div className="fig"><span className="k">Cost to act</span><span className="v">{inr(p.cost)}</span><span className="faint xs">{inr(p.parts)} payment + {inr(p.down)} revenue impact</span></div>
+      <div className="fig"><span className="k">Expected failures in 90 days</span><span className="v">{p.before.toFixed(1)} → {p.after.toFixed(1)}</span><span className="faint xs">without → with service (assumed)</span></div>
+      <div className="fig pos"><span className="k">Estimated loss avoided</span><span className="v est">{lakh(p.avoided)}</span><span className="faint xs">estimate, not a saving</span></div>
+      <div className="fig pos"><span className="k">Estimated net benefit</span><span className="v est">{lakh(p.net)}</span><span className="faint xs">pays back if it prevents {p.breakeven} failure{p.breakeven>1?"s":""}</span></div>
+    </div>
+    <div><button className="link sm" onClick={()=>setShowWork(!showWork)} aria-expanded={showWork}>{showWork?"Hide":"Show"} how we worked this out</button></div>
+    {showWork && <div className="panel"><div className="receipt">
+      <span>Trucks in plan</span><span className="r">{p.n}</span>
+      <span>Chance each fails within 90 days without service (illustrative assumption)</span><span className="r">45%</span>
+      <span>Chance after service (illustrative assumption; some risk remains)</span><span className="r">8%</span>
+      <span>Expected failures: {p.n} × 45% → {p.n} × 8%</span><span className="r">{p.before.toFixed(2)} → {p.after.toFixed(2)}</span>
+      <span>One unplanned failure: ₹38,000 repair and tow + 2 days off booked runs × ₹8,000 revenue</span><span className="r">{inr(FAIL_COST)}</span>
+      <span className="tot">Estimated loss avoided ({(p.before-p.after).toFixed(2)} × {inr(FAIL_COST)})</span><span className="r tot">{inr(p.avoided)}</span>
+      <span>Cash payment: service ₹5,000 × {p.n}</span><span className="r">− {inr(p.parts)}</span>
+      <span>Revenue impact: 4 h in each truck's lowest-demand window (no load booked), ~₹1,000 × {p.n}</span><span className="r">− {inr(p.down)}</span>
+      <span className="tot">Estimated net benefit (not profit)</span><span className="r tot">{inr(p.net)}</span>
+      <span>Pays back if it prevents ({inr(p.cost)} ÷ {inr(FAIL_COST)}, rounded up)</span><span className="r">{p.breakeven} failure{p.breakeven>1?"s":""}</span>
+    </div><p className="faint xs">Why ₹1,000 vs ₹8,000: a planned service sits in a quiet window with no booked load, while an unplanned breakdown takes the truck off booked runs for about 2 days. Payment uses Sai Auto Works' ₹5,000 price; the review screen updates it if you pick another vendor.</p></div>}
+
+    <div className="panel">
+      <h2>Data each step needs</h2>
+      <div className="req"><span className="h">Step</span><span className="h">Needs</span><span className="h"></span>
+        {FRESH.map((f,i)=><React.Fragment key={i}><span>{f.step}</span><span className="muted">{f.need}</span><span/></React.Fragment>)}</div>
+      {!locked && d.needsCheck.length>0 && <div className="notice warn sm"><span><b>{d.needsCheck.length} truck{d.needsCheck.length>1?"s":""} need{d.needsCheck.length>1?"":"s"} an availability check before booking:</b> {d.needsCheck.join(", ")}. The evidence still counts; we just don't know where {d.needsCheck.length>1?"they are":"it is"} today. Resolve it on the review screen.</span></div>}
+    </div>
+
+    <div className="panel flush">
+      <div className="ph"><h2>Trucks in this plan</h2><span className="faint sm">{p.n} of 10 included</span></div>
+      <div className="tw"><table>
+        <thead><tr><th>Truck</th><th>Usual route</th><th>Evidence</th><th>Last data</th><th></th></tr></thead>
+        <tbody>{TRUCKS.map(t=>{
+          const out = !p.list.find(x=>x.id===t.id);
+          const old = (S.mode==="stale" && t.depot==="Bhiwandi") || t.age>=3;
+          return <tr key={t.id} className={out?"out":""}>
+            <td><b style={{fontWeight:500}}>{t.id}</b></td><td>{t.route}</td>
+            <td><Chip tone={t.sig==="Strong"?"ok":"line"}>{t.sig}</Chip></td>
+            <td>{old ? <Chip tone="stale">{S.mode==="stale"&&t.depot==="Bhiwandi"?"3 h ago":t.seen}</Chip> : <span className="faint">Today {t.seen}</span>}</td>
+            <td style={{textAlign:"right"}}>{locked ? <span className="faint xs">{out?"Not in plan":"Locked"}</span> : out
+              ? <button className="link sm" onClick={()=>A.addBack(t.id)}>Add back</button>
+              : <button className="link sm" onClick={()=>A.modal({type:"exclude", id:t.id})}>Exclude</button>}</td>
+          </tr>})}</tbody></table></div>
+    </div>
+
+    {!locked && <div className="row">
+      <button className="btn" onClick={()=>A.go("evidence")}>Check the evidence</button>
+      <button className="btn primary" disabled={!p.n} onClick={()=>A.go("review")}>Review and approve</button>
+      <button className="btn ghost" onClick={()=>A.modal({type:"notnow"})}>Not now</button>
+    </div>}
+    {locked && <div className="row"><button className="btn primary" onClick={()=>A.go("track")}>Track progress</button></div>}
+  </div>;
+}
+
+/* ============ Evidence ============ */
+function Evidence({S, A}){
+  const p = shownPlan(S);
+  const ev = {n:p.list.length, ghat:p.list.filter(t=>t.ghat).length, multi:p.list.filter(t=>t.multi).length, over:p.list.filter(t=>t.over).length, noLoad:p.list.filter(t=>!t.load).length};
+  const oldList = S.approved ? [] : p.list.filter(t=>(S.mode==="stale"&&t.depot==="Bhiwandi")||t.age>=3);
+  return <div className="page">
+    <div className="spread">
+      <div className="col" style={{gap:8}}><h1>Why we think these trucks need a clutch service</h1><p className="muted">Data as of today 08:40. Model figures are illustrative.</p></div>
+      <button className="btn" onClick={()=>A.openAsk("clutch")}>Question this</button>
+    </div>
+    <div className="conclusion">
+      <div className="col" style={{gap:4}}><span className="k">Conclusion</span><p className="say s">Early clutch wear on {ev.n} trucks is likely.</p><span className="sm muted">Three independent vehicle signals agree, and the same pattern came before 4 failures last quarter.</span></div>
+      <div className="col" style={{gap:4}}><span className="k">Main uncertainty</span><p className="sm"><b>We can't see service records from outside garages.</b> A recent clutch job elsewhere would make a truck a false positive.</p>
+        <span className="sm muted">Freshness: all {ev.n} trucks are within the 48-hour limit for trend evidence.{oldList.length?` ${oldList.length} ha${oldList.length>1?"ve":"s"} no current location, which only matters for booking.`:""}</span></div>
+    </div>
+    <div className="ledger">
+      <div className="lcol"><h3>What supports it</h3>
+        <div className="ev"><span className="mk sup">+</span><div>Clutch slip events up 3.2× in 30 days on all {ev.n} trucks<div className="src">Strong · vehicle data, 30 days</div></div></div>
+        <div className="ev"><span className="mk sup">+</span><div>Clutch engages ~180 rpm higher than when new<div className="src">Strong · engine and gearbox signals</div></div></div>
+        <div className="ev"><span className="mk sup">+</span><div>The 4 trucks that failed last quarter showed this pattern 5–7 weeks before<div className="src">Moderate · your service history</div></div></div>
+        <div className="ev"><span className="mk sup">+</span><div>{ev.ghat} of {ev.n} trucks climb the Kasara ghat with heavy loads<div className="src">Supporting · trip and route data</div></div></div></div>
+      <div className="lcol"><h3>What we couldn't see</h3>
+        <div className="ev"><span className="mk mis">?</span><div>Service records from outside garages<div className="src">Missing source · doesn't block approval</div></div></div>
+        {oldList.length>0 && <div className="ev"><span className="mk mis">?</span><div>Current location of {oldList.map(t=>t.id).join(", ")}<div className="src">Freshness · blocks booking until dispatch confirms</div></div></div>}
+        {ev.noLoad>0 && <div className="ev"><span className="mk mis">?</span><div>No load sensor on {ev.noLoad} truck{ev.noLoad>1?"s":""}; loads estimated from weight slips<div className="src">Partial data · doesn't block approval</div></div></div>}</div>
+      <div className="lcol"><h3>Other explanations we checked</h3>
+        <div className="ev"><span className="mk alt">~</span><div><b style={{fontWeight:500}}>Operator technique.</b> Less likely: on {ev.multi} of {ev.n} trucks the pattern continues across 2 or more operators.</div></div>
+        <div className="ev"><span className="mk alt">~</span><div><b style={{fontWeight:500}}>Sensor fault.</b> Unlikely: three independent signals agree.</div></div>
+        <div className="ev"><span className="mk alt">~</span><div><b style={{fontWeight:500}}>Overloading.</b> Contributes on {ev.over} trucks, but doesn't explain the other {ev.n-ev.over}.</div></div></div>
+    </div>
+    {!S.approved && <div className="panel">
+      <div className="spread"><h2>Not convinced? Change the plan</h2><span className="faint sm">Your reason is logged and used to improve future proposals</span></div>
+      <div className="row">
+        <button className="btn" disabled={!ev.n} onClick={()=>A.modal({type:"exclude", id:p.list[0]?.id})}>Exclude a truck</button>
+        <button className="btn" onClick={()=>A.openAsk("clutch")}>Ask why these trucks and not the other 18</button>
+        <button className="btn ghost" onClick={()=>A.modal({type:"notnow", disagree:true})}>Disagree with the whole proposal</button>
+      </div>
+      {S.excluded.size>0 && <div className="notice info"><span><b>Plan updated.</b> {p.n} trucks · cost {inr(p.cost)} · estimated net benefit {lakh(p.net)}. Rahul Patil has been asked to upload the outside service record.</span></div>}
+    </div>}
+    <div className="row"><button className="btn" onClick={()=>A.go("proposal")}>Back to the proposal</button>{!S.approved && <button className="btn primary" disabled={!ev.n} onClick={()=>A.go("review")}>Review and approve</button>}</div>
+  </div>;
+}
+
+/* ============ Review ============ */
+function Review({S, A}){
+  const [cmp, setCmp] = useState(false);
+  if(S.approved) return <div className="page"><h1>Already approved</h1><p className="muted">This plan is locked. Changes need an amendment.</p><div><button className="btn primary" onClick={()=>A.go("track")}>Track progress</button></div></div>;
+  const d = draft(S);
+  const v = VENDORS.find(x=>x.id===S.vendor);
+  const check = S.availReq==="confirmed" ? [] : d.needsCheck;
+  const rows = d.list.map(t=>({t, slot:v.slots[t.id], blocked: check.includes(t.id)}));
+  const ready = rows.filter(r=>r.slot && !r.blocked), missing = rows.filter(r=>!r.slot || r.blocked);
+  const fullOk = missing.length===0;
+  const approveRows = fullOk || S.partialOk ? ready : [];
+  const pay = approveRows.length*v.price;
+  const within = pay<=50000;
+  const canApprove = approveRows.length>0 && within;
+  const slotCount = d.list.filter(t=>v.slots[t.id]).length;
+  return <div className="page">
+    <div className="col" style={{gap:8}}><h1>Review before you approve</h1><p className="muted">Exactly what happens, who owns it, and what it costs.</p></div>
+    <div className="grid2">
+      <div className="panel flush">
+        <div className="ph"><h2>Schedule</h2><span className="faint sm">{v.name}, {v.loc} · {slotCount} of {d.n} trucks have a slot</span></div>
+        {rows.map(({t,slot,blocked})=><div key={t.id} className="item"><div><div className="t">{t.id}</div><div className="m">{t.route}</div></div>
+          <div className="n">{!slot ? <Chip tone="crit">No slot with this vendor</Chip> : blocked ? <Chip tone="stale">Availability not confirmed</Chip> : <span className="sm">{slotLabel(slot)}</span>}<span className="faint xs">{!slot?"Pick another vendor or leave for later": blocked?`Slot held: ${slotLabel(slot)}`:`About 4 h at ${v.name}, ${v.loc}`}</span></div></div>)}
+      </div>
+      <div className="col">
+        {check.length>0 && <div className="panel">
+          <h2>Availability check needed</h2>
+          <p className="sm muted">{check.join(", ")}: data older than 3 hours, so we can't confirm {check.length>1?"they":"it"} can reach the vendor. The proposal's evidence is still valid.</p>
+          {S.availReq==="requested" ? <div className="notice info sm"><span>Asked Priya Shah (dispatch) at {S.availAt}. Waiting for her to confirm.</span></div>
+            : <div className="row"><button className="btn" onClick={A.requestAvail}>Ask dispatch to confirm availability</button></div>}
+          <p className="faint xs">Other ways forward: approve the rest now and schedule {check.length>1?"these":"this one"} later (below), or exclude {check.length>1?"them":"it"} on the proposal.</p>
+        </div>}
+        {S.availReq==="confirmed" && d.needsCheck.length>0 && <div className="notice ok sm"><span>Priya Shah confirmed availability for {d.needsCheck.join(", ")} at {S.availDoneAt}.</span></div>}
+        <div className="panel">
+          <h2>Spend</h2>
+          <div className="receipt">
+            <span>Cash payment: service ({approveRows.length} × {inr(v.price)})</span><span className="r">{inr(pay)}</span>
+            <span className="faint">Revenue impact of planned downtime (not a payment)</span><span className="r faint">{inr(approveRows.length*PLANNED_REV)}</span>
+            <span className="tot">You're approving a payment of</span><span className="r tot">{inr(pay)}</span>
+          </div>
+          {!within && <div className="notice warn sm"><span>Above your ₹50,000 limit. This would need the owner's approval (not in prototype).</span></div>}
+          {within && approveRows.length>0 && <div className="notice ok sm"><span>Within your ₹50,000 limit. Above Rahul's ₹10,000 limit, so it needs you.</span></div>}
+          {!fullOk && <label className="row sm" style={{cursor:"pointer",gap:8,alignItems:"flex-start",flexWrap:"nowrap"}}><input type="checkbox" id="partial-ok" checked={S.partialOk} onChange={e=>A.set({partialOk:e.target.checked})}/><span>Approve the {ready.length} trucks with a confirmed slot now. The other {missing.length} stay in the proposal until they have one.</span></label>}
+        </div>
+        <div className="panel">
+          <h2>Who and how</h2>
+          <dl className="kv">
+            <dt>Owner</dt><dd>Rahul Patil, Maintenance lead. Confirms each slot with the vendor.</dd>
+            <dt>Vendor</dt><dd>{v.name}, {v.loc} · {v.rating}<br/><button className="link sm" aria-expanded={cmp} onClick={()=>setCmp(!cmp)}>{cmp?"Hide comparison":"Compare 3 vendors"}</button></dd>
+            <dt>Notifications</dt><dd><label className="row sm" style={{cursor:"pointer",gap:8}}><input type="checkbox" id="notify-ops" checked={S.notify} onChange={e=>A.set({notify:e.target.checked})}/>Tell the {approveRows.length||ready.length} operators their service day</label></dd>
+          </dl>
+          {cmp && <div className="tw"><table className="vt"><thead><tr><th></th><th>Vendor</th><th>Per truck</th><th>Slots for this plan</th><th>Total</th></tr></thead><tbody>
+            {VENDORS.map(x=>{const c=d.list.filter(t=>x.slots[t.id]).length; return <tr key={x.id}><td><input type="radio" name="vendor" id={"vendor-"+x.id} checked={S.vendor===x.id} onChange={()=>A.set({vendor:x.id, partialOk:false})} aria-label={x.name}/></td><td>{x.name}, {x.loc}<div className="faint xs">{x.rating}</div></td><td>{inr(x.price)}</td><td>{c} of {d.n}</td><td>{inr(c*x.price)}</td></tr>})}
+          </tbody></table></div>}
+        </div>
+        <div className="notice info sm"><span>Before the vendor confirms (usually within 2 hours) you can cancel free. After that you can request cancellation; within 24 h of the slot the vendor may charge ₹500. Once work starts, you can raise an issue instead.</span></div>
+        <div className="row"><button className="btn primary" disabled={!canApprove} onClick={()=>A.approve(approveRows.map(r=>({...r.t, slot:r.slot})), v, fullOk?0:missing.length)}>{canApprove?`Approve ${inr(pay)} for ${approveRows.length} truck${approveRows.length>1?"s":""}`:!within?"Above your limit":"Resolve the trucks above, or approve partially"}</button><button className="btn ghost" onClick={()=>A.go("proposal")}>Back</button></div>
+      </div>
+    </div>
+  </div>;
+}
+
+/* ============ Track ============ */
+const VIEW_T = {d5: 13*24+12};   // Tue 13 Oct, 12:00
+function slotOf(S,t){ return (S.rebooked && S.rebooked.id===t.id) ? S.rebooked.slot : t.slot; }
+function failIdOf(S){
+  if(!S.approved) return null;
+  const c = S.approved.list.filter(t=>!["cancelled","cancel_requested","issue"].includes(S.slots[t.id]));
+  return ((c.find(t=>t.slot[0]===10))||c[0]||{}).id;
+}
+function slotStatus(S, t){
+  const st = S.slots[t.id] || "pending";
+  if(["cancelled","cancel_requested","issue"].includes(st)) return st;
+  if(S.view==="now") return st;
+  if(S.view==="d90") return "completed";
+  const s = slotOf(S,t); const start = s[0]*24+s[1], now = VIEW_T.d5;
+  if(S.vendorFailed && t.id===failIdOf(S)) return "vendor_cancelled";
+  if(S.rebooked && S.rebooked.id===t.id) return start+4<=now ? "completed" : "rebooked";
+  return start+4<=now ? "completed" : start<=now ? "in_service" : "confirmed";
+}
+function Track({S, A}){
+  if(!S.approved) return <div className="page"><h1>Nothing approved yet</h1><p className="muted">Approve the clutch proposal to track it here.</p><div><button className="btn primary" onClick={()=>A.go("proposal")}>Open the proposal</button></div></div>;
+  const ap = S.approved;
+  const active = ap.list.filter(t=>S.slots[t.id]!=="cancelled");
+  const counts = {}; active.forEach(t=>{const s=slotStatus(S,t); counts[s]=(counts[s]||0)+1});
+  const lastDay = active.length ? Math.max(...active.map(t=>slotOf(S,t)[0])) : 9;
+  const outcomeDate = fmtDate(plusDays(lastDay,90));
+  const confirmedN = active.filter(t=>S.slots[t.id]==="confirmed").length;
+  const allConfirmed = active.every(t=>(S.slots[t.id]||"pending")!=="pending");
+  const chip = S.view==="d90" ? <Chip tone="ok">Completed · outcome checked</Chip> : S.view==="d5" ? <Chip tone="info">In progress</Chip> : <Chip tone={allConfirmed?"info":"warn"}>{allConfirmed?"Scheduled":"Waiting for vendor"}</Chip>;
+  const steps = [
+    {k:"Approved", s:`Thu 8 Oct, by you · ${inr(ap.pay)}`, c:"done"},
+    {k:"Scheduled", s: S.view==="now" ? `${confirmedN} of ${active.length} confirmed by vendor` : `${active.length} slots booked`, c: S.view==="now"&&!allConfirmed?"now":"done"},
+    {k:"In service", s: S.view==="now"?"First slot Fri 9 Oct": S.view==="d5" ? `${counts.completed||0} done, ${counts.in_service||0} in service${counts.vendor_cancelled?`, ${counts.vendor_cancelled} cancelled by vendor`:""}${counts.rebooked?`, ${counts.rebooked} rebooked`:""}` : "All done", c: S.view==="now"?"":S.view==="d5"?(counts.vendor_cancelled?"fail":"now"):"done"},
+    {k:"Completed", s: S.view==="d90"?`Last service ${DAYS[lastDay]}`:"—", c:S.view==="d90"?"done":""},
+    {k:"Outcome checked", s: `${S.view==="d90"?"Checked":"Due"} ${outcomeDate}`, c:S.view==="d90"?"done":""},
+  ];
+  const label = {pending:["warn","Waiting for vendor"], confirmed:["info","Confirmed"], cancelled:["stale","Cancelled by you · no charge"], cancel_requested:["warn","Cancellation requested · waiting for vendor"], completed:["ok","Completed"], in_service:["warn","In service"], vendor_cancelled:["crit","Cancelled by vendor"], rebooked:["info","Rebooked"], issue:["warn","Issue raised · Rahul following up"]};
+  const failT = ap.list.find(t=>t.id===failIdOf(S));
+  const actualSpend = active.length*ap.price + 2300;
+  const fa = figures(active);
+  return <div className="page">
+    <div className="spread">
+      <div className="col" style={{gap:8}}><div className="row">{chip}<span className="faint sm">Approved by you, Thu 8 Oct · {ap.vendor}{S.partial?` · ${S.partial} truck${S.partial>1?"s":""} still need a slot`:""}</span></div><h1>Clutch service, {active.length} trucks</h1></div>
+      <div className="col" style={{gap:6,alignItems:"flex-end"}}><span className="faint xs">See this plan on</span>
+        <div className="seg" role="group" aria-label="Point in time">
+          <button aria-pressed={S.view==="now"} onClick={()=>A.set({view:"now"})}>Today, 8 Oct</button>
+          <button aria-pressed={S.view==="d5"} onClick={()=>A.set({view:"d5"})}>Tue 13 Oct</button>
+          <button aria-pressed={S.view==="d90"} onClick={()=>A.set({view:"d90"})}>{outcomeDate}</button>
+        </div></div>
+    </div>
+    <div className="steps">{steps.map(s=><div key={s.k} className={"step "+s.c}><b>{s.k}</b><span>{s.s}</span></div>)}</div>
+    <p className="faint xs">Outcome check: each truck is reviewed 90 days after its own service. This batch review runs 90 days after the last service ({DAYS[lastDay]} → {outcomeDate}).</p>
+
+    {S.view==="d5" && S.vendorFailed && failT && S.slots[failT.id]!=="cancelled" && <div className="notice crit"><div className="col" style={{gap:8}}>
+      <span><b>{ap.vendor} cancelled the {slotLabel(failT.slot)} slot for {failT.id}</b> (mechanic unavailable). Nothing was charged.</span>
+      <div className="row"><button className="btn sm primary" onClick={()=>A.rebook(failT.id,[14,14],"Sai Auto Works, Bhiwandi")}>Rebook Wed 14 Oct, 14:00 (Sai Auto Works)</button>
+      <button className="btn sm" onClick={()=>A.modal({type:"rebook", id:failT.id})}>Other options</button></div>
+    </div></div>}
+    {S.view==="d5" && S.rebooked && <div className="notice ok sm"><span>{S.rebooked.id} rebooked for {slotLabel(S.rebooked.slot)} at {S.rebooked.vendor}. Outcome check moves to {outcomeDate}.</span></div>}
+
+    {S.view==="d90" ? <div className="grid2">
+      <div className="panel">
+        <h2>What happened</h2>
+        <div className="receipt">
+          <span>Approved payment</span><span className="r">{inr(active.length*ap.price)}</span>
+          <span>Actual spend from invoices (one truck needed a pressure plate)</span><span className="r">{inr(actualSpend)}</span>
+          <span>Clutch failures observed in these {active.length} trucks</span><span className="r">0</span>
+          <span>Failures in 18 similar trucks not serviced, same period (illustrative)</span><span className="r">3</span>
+        </div>
+        <h3>Predicted at approval (estimate)</h3>
+        <div className="receipt">
+          <span className="faint">Failures without → with service</span><span className="r faint">{fa.before.toFixed(1)} → {fa.after.toFixed(1)}</span>
+          <span className="faint">Estimated loss avoided</span><span className="r faint">{lakh(fa.avoided)}</span>
+        </div>
+        <p className="faint xs">Zero failures is consistent with the prediction but doesn't prove the estimated saving. The comparison group is the stronger signal, and it's still small.</p>
+      </div>
+      <div className="panel">
+        <h2>You've approved 5 proposals like this one</h2>
+        <p className="muted sm">All were clutch or brake wear on 3 or more trucks of one model, under ₹50,000. You could let SuprFleet prepare or book these within limits you set. Test it on past cases first.</p>
+        <div><button className="btn primary" onClick={()=>A.go("rule")}>Try an automation rule</button></div>
+      </div>
+    </div> :
+    <div className="panel flush">
+      <div className="ph"><h2>Trucks</h2><span className="faint sm">Owner: Rahul Patil</span></div>
+      {ap.list.map(t=>{
+        const st = slotStatus(S,t); const [tone,txt] = label[st];
+        const slot = slotOf(S,t);
+        let action = null;
+        if(st==="pending") action = <button className="btn sm" onClick={()=>A.cancelBooking(t.id)}>Cancel booking</button>;
+        else if(st==="confirmed"||st==="rebooked") action = <button className="btn sm" onClick={()=>A.modal({type:"reqcancel", id:t.id, slot})}>Request cancellation</button>;
+        else if(st==="in_service"||st==="completed") action = <button className="btn sm" onClick={()=>A.modal({type:"issue", id:t.id})}>Raise an issue</button>;
+        return <div key={t.id} className="slotrow"><div><div style={{fontWeight:500}}>{t.id}</div><div className="sm muted">{slotLabel(slot)} · {S.rebooked&&S.rebooked.id===t.id?S.rebooked.vendor:ap.vendor}</div></div>
+          <div className="acts"><Chip tone={tone}>{txt}</Chip>{action}</div></div>})}
+    </div>}
+  </div>;
+}
+
+/* ============ Automation rule ============ */
+function RuleScreen({S, A}){
+  const [tested, setTested] = useState(0);
+  const [mode, setMode] = useState(null);
+  const [limitOk, setLimitOk] = useState(false);
+  const rule = S.rules.find(r=>r.id==="clutch");
+  if(rule.status==="On"||rule.status==="Paused") return <div className="page"><h1>Clutch and brake rule</h1>
+    <div className="notice ok"><span>This rule is <b>{rule.status.toLowerCase()}</b>. {rule.mode}. Limit: {rule.limit}.</span></div><div><button className="btn" onClick={()=>A.go("rules")}>See automation rules</button></div></div>;
+  const cases = tested===2
+    ? [["m","2 Apr"],["m","9 May"],["x","2 Jul"],["m","30 Jul"],["s","18 Aug"],["m","3 Sep"],["m","24 Sep"]]
+    : [["m","2 Apr"],["m","9 May"],["r","2 Jul"],["m","30 Jul"],["s","18 Aug"],["m","3 Sep"],["m","24 Sep"]];
+  const tone = {m:"ok", r:"warn", s:"stale", x:"line"};
+  const label = {m:"Would run · matches your decision", r:"Would run · you rejected it", s:"Skipped · data was stale", x:"Now excluded · trucks marked for sale"};
+  return <div className="page">
+    <div className="col" style={{gap:8}}><h1>New automation rule</h1><p className="muted">Narrow on purpose. Test it on the last 6 months before it does anything.</p></div>
+    <div className="panel">
+      <p className="rule">When <span className="tok">3 or more trucks of the same model</span> show <span className="tok">clutch or brake wear</span> with <span className="tok">strong evidence</span>, and the service costs <span className="tok">under ₹50,000</span> in total, <span className="tok">book the preferred vendor in each truck's quietest window</span>{tested===2 && <> and <span className="tok">skip trucks marked for sale</span></>}.</p>
+      <p className="sm muted">This rule can never: <span className="tok lock">control a vehicle</span> <span className="tok lock">change routes</span> <span className="tok lock">spend above ₹50,000</span> <span className="tok lock">act on safety cases</span></p>
+      <div className="row"><button className="btn primary" onClick={()=>setTested(1)} disabled={tested>0}>{tested>0?"Tested":"Test on the last 6 months"}</button></div>
+    </div>
+    {tested>0 && <div className="panel">
+      <div className="spread"><h2>7 past cases evaluated</h2><span className="faint sm">Apr – Sep 2026</span></div>
+      <div className="col" style={{gap:0}}>{cases.map(([k,d],i)=><div key={i} className="item" style={{padding:"9px 0"}}><div className="sm">{d}</div><div className="n"><Chip tone={tone[k]}>{label[k]}</Chip></div></div>)}</div>
+      {tested===1 && <div className="notice warn"><div className="col" style={{gap:8}}><span><b>Suggested change, not applied yet.</b> On 2 Jul you rejected it because those trucks were about to be sold. Add "skip trucks marked for sale"?</span><div><button className="btn sm" onClick={()=>setTested(2)}>Add the change and test again</button></div></div></div>}
+      {tested===2 && <div className="notice ok sm"><span>Retested with the change: 5 would run and all match your decisions, 1 is now excluded, 1 is skipped because its data was stale (the safe outcome).</span></div>}
+      <p className="sm muted">Matching 5 past decisions is a preview, not proof that future bookings will be right. The rule pauses itself if you cancel or reject 2 of its bookings, and you can pause it any time.</p>
+      {tested===2 && <>
+      <h3 style={{marginTop:6}}>How should it run?</h3>
+      <div className="radio">
+        <label><input type="radio" name="mode" id="mode-ask" checked={mode==="ask"} onChange={()=>{setMode("ask");setLimitOk(false)}}/><span><b>Ask me first.</b> <span className="muted">It prepares the booking; you approve each one. Nothing is spent without you. (Advisor plan, assumed)</span></span></label>
+        <label><input type="radio" name="mode" id="mode-act" checked={mode==="act"} onChange={()=>setMode("act")}/><span><b>Book it and tell me.</b> <span className="muted">Books on its own; you can cancel free until the vendor confirms. (Delegate plan, assumed)</span></span></label>
+      </div>
+      {mode==="act" && <div className="notice warn sm"><label style={{display:"flex",gap:10,alignItems:"flex-start",cursor:"pointer"}}><input type="checkbox" id="limit-ok" checked={limitOk} onChange={e=>setLimitOk(e.target.checked)}/><span><b>Raise this rule's spending limit from the ₹5,000 default to ₹50,000.</b> Applies to this rule only. It equals your own approval limit, so the rule can't spend more than you could.</span></label></div>}
+      <div className="row"><button className="btn primary" disabled={!mode || (mode==="act"&&!limitOk)} onClick={()=>A.enableRule(mode)}>Turn on rule</button>
+        <button className="btn ghost" onClick={A.saveRuleDraft}>Save as draft</button></div></>}
+    </div>}
+  </div>;
+}
+
+/* ============ Lists ============ */
+function Decisions({S, A}){
+  const [open, setOpen] = useState(true);
+  if(S.mode==="empty"||S.mode==="loading") return <div className="page"><h1>Needs your decision</h1><div className="notice stale"><span>We haven't assessed your fleet yet, so there are no decisions. This doesn't mean everything is fine.</span></div></div>;
+  const D = decisions(S), inc = S.incident, dense = S.mode==="dense";
+  const head = dense ? `${D.groups.length} decision groups waiting for you, built from 62 issues today.` : `${D.morning.length+D.week.length} decisions waiting for you: ${D.morning.length} this morning, ${D.week.length} this week.`;
+  const DENSE_ROWS = [
+    ["grid","Grid outage, Nashik: 6 sites running on generators",`Fuel lasts about 9 hours. 900 L × ₹${FUEL.price} + ${inr(FUEL.delivery)} delivery = ${inr(900*FUEL.price+FUEL.delivery)}, above your ₹50,000 limit`,"By 13:00"],
+    ["inv","Inverters running hot at 3 sites","Heat plus load. Shift battery charging to night","Today"],
+    ["clutch",clutchLine(S).t,clutchLine(S).m,"By Fri 9 Oct"],
+    ["permit","Permit renewals for 9 trucks","Filed together · ₹27,000","By 20 Oct"],
+    ["coach","Coaching for 5 operators","Harsh acceleration on wet roads","This week"],
+    ["dev","3 devices offline for 2+ days","Field visit · ₹2,400","This week"]];
+  return <div className="page">
+    <div className="col" style={{gap:6}}><h1>Needs your decision</h1><p className="muted">{head} The badge counts the same items. Safety incidents have their own owner and are shown separately.</p></div>
+    <div className="urgent"><span className="ic" aria-hidden="true">!</span><div><b>Unexplained fuel loss, MH12-AB-1234.</b> <span className="muted">{inc.status==="closed"?"Closed as false alarm.":`Open · owner ${inc.owner}.`}</span></div><button className="btn sm" onClick={()=>A.go("theft")}>Review</button></div>
+    {dense ? <div className="panel flush">
+      <div>
+        <button className="item button" onClick={()=>setOpen(!open)} aria-expanded={open}><div><div className="t">Flooding at Bhiwandi: 27 trucks with deliveries today are stopped</div><div className="m">Two actions: reroute 23, and a separate call on 4 cement loads</div></div><div className="n"><b>{S.reroute&&S.cement?"Both done":S.reroute||S.cement?"1 of 2 done":"2 actions"}</b><span className="faint xs">By 11:00</span></div></button>
+        {open && <div className="detail" style={{padding:"4px 18px 18px"}}>
+          <dl className="kv">
+            <dt>Grouped from</dt><dd>31 alerts: trucks stationary over 2 h, 3 depot water-level sensors, NH-48 closure notice</dd>
+            <dt>Affected</dt><dd>72 trucks at Bhiwandi. 27 have deliveries today (23 + 4 below); 45 have no load today and stay parked</dd>
+          </dl>
+          <div className="case"><h3>Action 1 · Reroute 23 trucks via Thane</h3>
+            <p className="sm muted">Covers 23 trucks and 23 deliveries to 8 sites (not site 12). +₹18,000 fuel, about +1.5 h each. Owner: Priya Shah, dispatch.</p>
+            <details><summary className="link sm" style={{cursor:"pointer"}}>See the 23 trucks</summary><p className="sm muted" style={{marginTop:6}}>MH04-AA-1101 to MH04-AA-1123 (illustrative IDs), delivering steel, sand and blocks to sites 3, 5, 8, 9, 14, 21, 30 and 33.</p></details>
+            {S.reroute ? <div className="notice info sm"><span>Approved at {S.rerouteAt}. Priya is sending new routes. 0 of 23 drivers confirmed, so they stay at risk.</span></div>
+              : <div className="row"><button className="btn primary" onClick={A.approveReroute}>Approve reroute: 23 trucks, 23 deliveries, +₹18,000</button><button className="btn ghost" onClick={()=>A.openAsk("reroute")}>Ask why these 23</button></div>}
+          </div>
+          <div className="case"><h3>Action 2 · 4 cement loads for site 12 (not part of the 23)</h3>
+            <p className="sm muted">The pour starts at 12:00; rerouted trucks would arrive about 13:30. Options: buy 4 loads from a local supplier (about ₹38,000) or move the pour to Friday. Owner: Kavita Rao, site 12 manager.</p>
+            {S.cement ? <div className="notice info sm"><span>Assigned to Kavita Rao at {S.cementAt}. Waiting for her to choose local supply or a new pour date.</span></div>
+              : <div className="row"><button className="btn" onClick={A.assignCement}>Assign to Kavita Rao, site 12</button></div>}
+          </div>
+        </div>}
+      </div>
+      {DENSE_ROWS.map(([id,t,m,w])=>
+        <div key={id} className="item"><div><div className="t">{t}</div><div className="m">{m}</div></div><div className="n">
+          {id==="grid" ? (S.gridEscalated ? <Chip tone="info">Sent to owner for approval</Chip> : <button className="btn sm" onClick={A.escalateGrid}>Send to owner for approval</button>)
+           : id==="clutch" ? <button className="btn sm" onClick={()=>A.go(clutchLine(S).to)}>Open</button>
+           : <button className="btn sm oos" onClick={()=>A.toast("Not built in this prototype.")}>Open <span className="faint xs">(not in prototype)</span></button>}
+          <span className="faint xs">{w}</span></div></div>)}
+    </div>
+    : <>
+      <div className="panel flush"><div className="ph"><h2>This morning</h2></div>
+        {D.morning.length===0 && <div className="item"><div className="m">Nothing waiting for you. Assigned and approved items are tracked on Today until they're confirmed.</div></div>}
+        {D.morning.map(x=><button key={x.id} className="item button" onClick={()=>A.go("today")}><div><div className="t">{x.id==="dispatch"?"8 deliveries short of a truck or driver":"3 sites low on generator fuel"}</div><div className="m">{x.id==="dispatch"?"Assign replacements before 09:30":`Refuel ${inr(FUEL.total)} before 10:00`}</div></div><div className="n"><span className="faint xs">Act on Today</span></div></button>)}</div>
+      <div className="panel flush"><div className="ph"><h2>This week</h2></div>
+        {weekItems(S).map((d,i)=><button key={i} className="item button" onClick={()=>i===0?A.go(d.to):A.toast("Not built in this prototype.")}><div><div className="t">{d.t}</div><div className="m">{d.m}{i>0?" · details not in prototype":""}</div></div><div className="n"><b className="est">{d.v}</b><span className="faint xs">{d.when}</span></div></button>)}</div>
+    </>}
+  </div>;
+}
+
+function Theft({S, A}){
+  const inc = S.incident;
+  const [note, setNote] = useState("");
+  return <div className="page">
+    <div className="col" style={{gap:8}}><div className="row"><Chip tone="crit">Urgent · safety</Chip><Chip tone={inc.status==="closed"?"stale":"info"}>{inc.status==="closed"?"Closed":"Open"} · owner {inc.owner}</Chip></div>
+      <h1>Unexplained fuel loss, MH12-AB-1234</h1>
+      <p className="muted" style={{maxWidth:"70ch"}}>Safety cases come before every cost decision. SuprFleet doesn't take vehicle-control actions on its own. Sending an alert doesn't close a case; someone has to own it.</p></div>
+    <div className="grid2">
+      <div className="panel">
+        <h2>Who was contacted</h2>
+        <p className="sm muted">Policy: urgent alerts must be acknowledged within 15 minutes, otherwise they go to the backup owner.</p>
+        <div className="tl">
+          <div className="miss"><span className="t">02:12</span>Alerted <b>Sunita Rao</b> (Safety lead) by call and app. <span className="muted">Not acknowledged in 15 min.</span></div>
+          <div className="ok"><span className="t">02:27</span>Escalated to <b>Arjun Nair</b> (duty manager). <span className="muted">Acknowledged 02:29; owner since then.</span></div>
+          <div><span className="t">02:35</span>Arjun called operator Sanjay More. <span className="muted">No answer.</span></div>
+          <div className="ok"><span className="t">06:10</span>Depot guard checked the truck: tank cap seal broken, photo attached.</div>
+          {inc.called && <div><span className="t">{inc.calledAt}</span>You called Sanjay More. <span className="muted">No answer; reminder in 10 min.</span></div>}
+          {inc.owner==="You" && <div className="ok"><span className="t">{inc.ownedAt}</span>You took ownership from Arjun Nair.</div>}
+          {inc.notes.map((n,i)=><div key={i}><span className="t">{n.at}</span>Note: {n.text}</div>)}
+          {inc.status==="closed" && <div><span className="t">{inc.closedAt}</span>Closed as a false alarm by you. Reason: {inc.falseAlarm}</div>}
+        </div>
+      </div>
+      <div className="col">
+        <div className="conclusion" style={{gridTemplateColumns:"1fr"}}>
+          <div className="col" style={{gap:4}}><span className="k">Conclusion</span><p className="say s">Theft is likely, not confirmed.</p></div>
+          <div className="col" style={{gap:4}}><span className="k">Main uncertainty</span><p className="sm"><b>The cab camera was offline</b>, and this fuel sensor glitched once in August. The broken seal supports theft.</p></div>
+        </div>
+        <div className="panel">
+          <h2>Evidence</h2>
+          <div className="ev"><span className="mk sup">+</span><div>Fuel dropped 40 L in 6 minutes while parked<div className="src">Strong · fuel sensor</div></div></div>
+          <div className="ev"><span className="mk sup">+</span><div>Tank cap opened at 02:03; seal found broken at 06:10<div className="src">Strong · sensor + guard photo</div></div></div>
+          <div className="ev"><span className="mk mis">?</span><div>Cab camera offline since 23:50<div className="src">Missing source</div></div></div>
+          <div className="ev"><span className="mk alt">~</span><div><b style={{fontWeight:500}}>Sensor glitch.</b> Possible, but the level hasn't recovered and the seal is broken.</div></div>
+        </div>
+      </div>
+    </div>
+    {inc.status!=="closed" && <div className="panel">
+      <h2>Act</h2>
+      <div className="row">
+        <button className="btn primary" disabled={inc.called} onClick={A.callOperator}>{inc.called?"Called · no answer":"Call the operator"}</button>
+        {inc.owner!=="You" && <button className="btn" onClick={A.takeOwnership}>Take ownership</button>}
+        <button className="btn ghost" onClick={()=>A.modal({type:"falsealarm"})}>Mark as false alarm</button>
+      </div>
+      <label className="sm muted" htmlFor="theft-note">Note for the safety team</label>
+      <textarea id="theft-note" value={note} onChange={e=>setNote(e.target.value)} placeholder="What should Sunita or Arjun know?"/>
+      <div><button className="btn sm" disabled={!note.trim()} onClick={()=>{A.addNote(note); setNote("")}}>Add note</button></div>
+      <p className="out-note">Vehicle-control actions, like immobilising, are outside this prototype.</p>
+    </div>}
+  </div>;
+}
+
+function Assets({S}){
+  const R = readiness(S);
+  return <div className="page"><h1>Assets</h1>
+    <p className="muted">500 assets serve today's {R.all} commitments. Asset counts and commitment counts are different things.</p>
+    <div className="panel"><div className="mix">{MIX.map(m=><span key={m.k} style={{flex:m.n,background:m.c}}/>)}</div><div className="legend">{MIX.map(m=><span key={m.k}><i className="dot" style={{background:m.c}}/>{m.k} {m.n}</span>)}</div></div>
+    <div className="panel flush"><div className="ph"><h2>Not reporting</h2><span className="faint sm">{S.mode==="stale"?"140 assets":"23 assets"} · {R.tot.u} of today's commitments affected</span></div>
+      {(S.mode==="stale"?[["140 assets at Bhiwandi",`Network outage since 05:40 · affects ${R.rows[0].u} departures`,"Will sync when the network returns"],["6 generators at Nashik",`Site power cut since 04:00 · affects ${R.rows[1].u} sites`,"Check after power returns"]]
+        :[["14 trucks",`Kasara ghat low-network corridor · ${R.rows[0].u} have departures today`,"Will sync when back in coverage"],["6 generators",`Nashik site power cut since 04:00 · ${R.rows[1].u} sites affected`,"Check after power returns"],["3 devices","No data for 2 days · no commitments today","Field visit needed"]]).map((r,i)=><div key={i} className="item"><div><div className="t">{r[0]}</div><div className="m">{r[1]}</div></div><div className="n"><span className="sm muted">{r[2]}</span></div></div>)}</div>
+    <p className="out-note">Asset detail pages are outside this prototype.</p></div>;
+}
+function Rules({S, A}){
+  return <div className="page"><h1>Automation rules</h1>
+    <p className="muted">What SuprFleet may do on its own, and its limits. Safety cases always go to a person.</p>
+    <div className="panel flush">{S.rules.map(r=><div key={r.id} className="item"><div><div className="t">{r.t}</div><div className="m">{r.m}{r.mode?` · ${r.mode}`:""}</div><div className="m">Limit: {r.limit} · {r.excl}</div></div>
+      <div className="n"><Chip tone={r.status==="On"?"ok":r.status==="Paused"?"warn":"line"}>{r.status}</Chip>
+        {r.status==="On" && <button className="btn sm" onClick={()=>A.toggleRule(r.id)}>Pause</button>}
+        {r.status==="Paused" && <button className="btn sm" onClick={()=>A.toggleRule(r.id)}>Resume</button>}
+        {r.status==="Draft" && r.id==="clutch" && <button className="btn sm" onClick={()=>A.go("rule")}>Test and turn on</button>}</div></div>)}</div>
+    <div className="panel"><h2>Your limits</h2><div className="receipt">
+      <span>You can approve up to</span><span className="r">₹50,000</span>
+      <span>Rahul Patil (Maintenance) up to</span><span className="r">₹10,000</span>
+      <span>Rules can spend per action, by default</span><span className="r">₹5,000</span>
+      <span>Highest limit any single rule can be given</span><span className="r">₹50,000 (your limit)</span>
+      <span>Urgent safety alerts</span><span className="r">Sunita Rao; if not acknowledged in 15 min, Arjun Nair</span>
+    </div></div></div>;
+}
+function Activity({S}){
+  return <div className="page"><h1>Activity</h1><p className="muted">Everything people, vendors and rules did, with the reason. Newest first.</p>
+    <div className="panel flush">{S.activity.map((r,i)=><div key={i} className="item"><div><div className="t">{r.what}</div><div className="m">{r.who}{r.why?` · ${r.why}`:""}</div></div><div className="n"><span className="faint sm">{r.time}</span></div></div>)}</div></div>;
+}
+
+/* ============ Ask ============ */
+const ANSWERS = {
+  clutch:{q:"Why these trucks and not the other 18 of this model?", scope:"28 Tata Signa 4825 trucks, last 30 days", say:"The other 18 don't show the slip pattern yet. Most run flat routes with lighter loads.", bars:[["Trucks in this plan",100,"3.2×"],["Other 18",34,"1.1×"]], note:"Slip events against each truck's own baseline. Sources: vehicle data, trip data."},
+  fuel:{q:"Why do sites 12, 19 and 27 need fuel now?", scope:"3 sites, generator fuel sensors, 08:30", say:"Grid supply at Nashik has been down since 04:00, so their generators have run all night. At current load they run dry between 12:30 and 14:00.", bars:[["Site 12",73,"4 h left"],["Site 19",100,"5.5 h left"],["Site 27",91,"5 h left"]], note:"Sources: generator fuel sensors, site load, grid status feed."},
+  reroute:{q:"Why reroute these 23 and not the other trucks?", scope:"72 stopped trucks at Bhiwandi", say:"These 23 carry material sites need today and can arrive in time via Thane. 45 have no load today; 4 for site 12 would arrive after the pour starts.", bars:[["No load today",100,"45"],["Reroute in time",51,"23"],["Too late via Thane",9,"4"]], note:"Sources: dispatch plan, site schedules, road closure notice."},
+  fuelcost:{q:"Why is fuel cost up 8% this month?", scope:"All trucks, September vs August", say:"Most of the 8% is idling at Bhiwandi while trucks wait for loading.", bars:[["Idling at Bhiwandi",100,"62%"],["Ghat route loads",37,"23%"],["Diesel price",24,"15%"]], note:"Sources: fuel sensors, trip data, fuel card prices."},
+};
+function Ask({initial, close}){
+  const [a, setA] = useState(initial||null); const [typed, setTyped] = useState(false); const [text, setText] = useState("");
+  const ref = useRef(null);
+  useEffect(()=>{ const prev=document.activeElement; ref.current && ref.current.focus(); const k=e=>{if(e.key==="Escape"){e.stopPropagation();close()}}; document.addEventListener("keydown",k,true); return ()=>{document.removeEventListener("keydown",k,true); prev&&prev.focus&&prev.focus()} },[]);
+  const ans = a ? ANSWERS[a] : null;
+  return <><div className="scrim" onClick={close}/>
+  <aside className="ask" role="dialog" aria-modal="true" aria-label="Ask about your fleet">
+    <header><h2>Ask about your fleet</h2><button className="btn ghost sm" onClick={close}>Close</button></header>
+    <div className="body">
+      <label htmlFor="ask-input" className="faint xs">Your question</label>
+      <input id="ask-input" ref={ref} value={text} onChange={e=>setText(e.target.value)} placeholder="Ask a question in your words, then press Enter" onKeyDown={e=>{if(e.key==="Enter"&&text.trim()){setA(null);setTyped(true)}}}/>
+      {typed && !ans && <div className="notice stale sm" role="status"><span>This prototype can't answer typed questions; it only has answers for the suggested questions below. In the product, Ask would answer from your fleet's data and show its sources.</span></div>}
+      {!ans && <div className="sugg"><span className="faint xs">Suggested from today's issues</span>{Object.entries(ANSWERS).map(([k,x])=><button key={k} onClick={()=>{setA(k);setTyped(false)}}>{x.q}</button>)}</div>}
+      {ans && <div className="answer">
+        <span className="faint xs">{ans.q}</span><span className="faint xs">Answer · {ans.scope}</span>
+        <p className="say s">{ans.say}</p>
+        <div className="bars">{ans.bars.map((b,i)=><div key={i}><span>{b[0]}</span><span className="b" style={{width:b[1]+"%",background:i?"var(--ink3)":"var(--accent)"}}/><span>{b[2]}</span></div>)}</div>
+        <p className="faint xs">{ans.note} Figures are illustrative.</p>
+        <div className="row"><button className="btn sm" onClick={close}>Done</button><button className="btn sm ghost" onClick={()=>setA(null)}>Ask something else</button></div>
+      </div>}
+    </div>
+  </aside></>;
+}
+
+/* ============ App ============ */
+const STORY = [["today","1 Today"],["proposal","2 Proposal"],["evidence","3 Evidence"],["review","4 Approve"],["track","5 Track"],["rule","6 Automation"]];
+const NAV = [["today","Today"],["decisions","Needs your decision"],["assets","Assets"],["rules","Automation rules"],["activity","Activity"]];
+const TITLES = {today:"Today",proposal:"Proposal",evidence:"Evidence",review:"Review and approve",track:"Clutch service",rule:"New automation rule",decisions:"Needs your decision",assets:"Assets",rules:"Automation rules",activity:"Activity",theft:"Urgent case"};
+const PARENT = {proposal:"decisions",evidence:"proposal",review:"proposal",track:"decisions",rule:"rules",theft:"decisions"};
+
+function approvedSnapshot(list, v){ const f=figures(list); return {...f, list, vendor:`${v.name}, ${v.loc}`, price:v.price, pay:list.length*v.price}; }
+function ensureApproved(s){
+  if(s.approved) return {};
+  const d = draft(s); const v = VENDORS[0];
+  const list = d.list.filter(t=>v.slots[t.id]).map(t=>({...t, slot:v.slots[t.id]}));
+  return {approved:approvedSnapshot(list,v), pstatus:"approved", slots:Object.fromEntries(list.map(t=>[t.id,"pending"])), failId:(list.find(t=>t.slot[0]===10)||list[0]).id, view:"now", availReq:"confirmed"};
+}
+
+function App(){
+  const [S, setS] = useState(INITIAL);
+  const [askOpen, setAskOpen] = useState(null);
+  const [modal, setModal] = useState(null);
+  const [toastMsg, setToastMsg] = useState(null);
+  const [narrow, setNarrow] = useState(()=>window.matchMedia("(max-width:760px)").matches);
+  const [reason, setReason] = useState("serviced"); const [reasonText, setReasonText] = useState("");
+  const [nn, setNn] = useState("later"); const [nnWhy, setNnWhy] = useState("");
+  const [faWhy, setFaWhy] = useState(""); const [issueWhy, setIssueWhy] = useState("");
+
+  const set = patch => setS(s=>({...s, ...(typeof patch==="function"?patch(s):patch)}));
+  const stamp = s => "08:"+String(Math.min(59,s.clock)).padStart(2,"0");
+  const act = (who, what, why, patch={}) => setS(s=>{ const t=stamp(s); const p = typeof patch==="function"?patch(s,t):patch; return {...s, ...p, clock:s.clock+1, activity:[{time:t, who, what, why}, ...s.activity]}; });
+  const toast = m => setToastMsg(m);
+  window.__sf = {reset:()=>reset(), clearToast:()=>setToastMsg(null)};
+
+  useEffect(()=>{ const mq=window.matchMedia("(max-width:760px)"); const f=()=>setNarrow(mq.matches); mq.addEventListener("change",f); return ()=>mq.removeEventListener("change",f)},[]);
+  useEffect(()=>{ const k=e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();setAskOpen("")} }; window.addEventListener("keydown",k); return ()=>window.removeEventListener("keydown",k)},[]);
+  useEffect(()=>{ if(!toastMsg) return; const t=setTimeout(()=>setToastMsg(null),3400); return ()=>clearTimeout(t)},[toastMsg]);
+  /* Simulated responses from other people and vendors. None of them changes readiness. */
+  useEffect(()=>{ if(S.screen==="track" && S.view==="now" && S.approved && Object.values(S.slots).includes("pending")){
+    const t=setTimeout(()=>act(S.approved.vendor, "Confirmed service slots", "Vendor confirmation", s=>({slots:Object.fromEntries(Object.entries(s.slots).map(([k,v])=>[k, v==="pending"?"confirmed":v]))})),2800); return ()=>clearTimeout(t)} },[S.screen,S.view,S.approved,S.slots]);
+  useEffect(()=>{ if(S.availReq==="requested"){ const t=setTimeout(()=>act("Priya Shah","Confirmed availability of trucks with old data","Dispatch check",(s,tm)=>({availReq:"confirmed", availDoneAt:tm})),2600); return ()=>clearTimeout(t)} },[S.availReq]);
+  useEffect(()=>{ if(S.fuel==="requested"){ const t=setTimeout(()=>act("Bharat Fuels",`Confirmed tanker for sites ${FUEL.sites} · arriving about 11:30`,"Delivery not yet made; sites still at risk",{fuel:"confirmed"}),3000); return ()=>clearTimeout(t)} },[S.fuel]);
+
+  const go = to => { set({screen:to}); window.scrollTo({top:0}); };
+  const reset = () => { setS(INITIAL()); setModal(null); setAskOpen(null); setToastMsg(null); window.scrollTo({top:0}); };
+  const A = {
+    go, set, toast, narrow,
+    modal: m => setModal(m),
+    openAsk: k => setAskOpen(k||""),
+    cancelCleaning: () => act("You","Cancelled panel cleaning for SOL-07 before vendor confirmation","No charge",(s,t)=>({cleaning:"cancelled", cleaningAt:t})),
+    assignDispatch: () => act("You","Assigned 8 at-risk deliveries to Priya Shah","Readiness unchanged until she confirms",(s,t)=>({dispatchAssigned:true, dispatchAt:t})),
+    approveFuel: () => act("You",`Approved ${inr(FUEL.total)} refuel for sites ${FUEL.sites} (${FUEL.litres} L)`,"Sites stay at risk until delivery is confirmed",(s,t)=>({fuel:"requested", fuelAt:t})),
+    takeOwnership: () => act("You","Took ownership of the fuel-loss case from Arjun Nair","",(s,t)=>({incident:{...s.incident, owner:"You", ownerRole:"Head of Operations", ownedAt:t}})),
+    callOperator: () => act("You","Called operator Sanjay More about the fuel loss","No answer; reminder in 10 min",(s,t)=>({incident:{...s.incident, called:true, calledAt:t}})),
+    addNote: text => { act("You","Added a note to the fuel-loss case",text.slice(0,60),(s,t)=>({incident:{...s.incident, notes:[...s.incident.notes,{at:t,text}]}})); toast("Note added to the case."); },
+    approveReroute: () => act("You","Approved reroute of 23 trucks via Thane (+₹18,000)","Flooding at Bhiwandi; drivers still to confirm",(s,t)=>({reroute:true, rerouteAt:t})),
+    assignCement: () => act("You","Assigned site 12 cement decision to Kavita Rao","Reroute would arrive after the pour",(s,t)=>({cement:true, cementAt:t})),
+    escalateGrid: () => act("You",`Sent Nashik refuel (${inr(900*FUEL.price+FUEL.delivery)}) to the owner for approval`,"Above your ₹50,000 limit",{gridEscalated:true}),
+    addBack: id => act("You",`Added ${id} back to the clutch plan`,"",s=>{const e=new Set(s.excluded); e.delete(id); return {excluded:e}}),
+    requestAvail: () => act("You","Asked Priya Shah to confirm availability of trucks with old data","Needed before booking",(s,t)=>({availReq:"requested", availAt:t})),
+    approve: (list, v, remaining) => {
+      act("You",`Approved ${inr(list.length*v.price)} clutch service for ${list.length} trucks with ${v.name}`,`${remaining?`${remaining} truck(s) still need a slot`:"Full plan"}${S.notify?" · operators told":""}`,
+        {approved:approvedSnapshot(list,v), pstatus:"approved", partial:remaining||null, slots:Object.fromEntries(list.map(t=>[t.id,"pending"])), failId:(list.find(t=>t.slot[0]===10)||list[0]).id, view:"now", screen:"track"});
+      window.scrollTo({top:0}); toast(`Approved. Rahul Patil is confirming slots with ${v.name}.`); },
+    cancelBooking: id => { act("You",`Cancelled booking for ${id} before vendor confirmation`,"No charge",s=>({slots:{...s.slots,[id]:"cancelled"}})); toast(`Booking for ${id} cancelled. No charge.`); },
+    rebook: (id, slot, vendor) => { act("You",`Rebooked ${id}: ${slotLabel(slot)} at ${vendor}`,"Vendor cancelled the original slot",{rebooked:{id,slot,vendor}, vendorFailed:false}); toast(`Rebooked ${slotLabel(slot)} at ${vendor}.`); setModal(null); },
+    enableRule: mode => { act("You",`Turned on rule: clutch and brake service (${mode==="ask"?"asks first":"books and tells"})`,`Tested on 7 past cases · ${mode==="act"?"limit raised from ₹5,000 to ₹50,000 for this rule":"₹5,000 default; asks before any spend"}`,
+        s=>({rules:s.rules.map(r=>r.id==="clutch"?{...r,status:"On",mode:mode==="ask"?"Asks you first":"Books and tells you", m:"Trucks · tested on 7 past cases", limit: mode==="act"?"₹50,000 for this rule (raised from ₹5,000)":"₹5,000 default · asks before any spend", excl:"Skips trucks marked for sale · never controls vehicles, changes routes or acts on safety cases"}:r), screen:"rules"}));
+      window.scrollTo({top:0}); toast("Rule turned on."); },
+    saveRuleDraft: () => { act("You","Saved the clutch rule as a draft","Not active",s=>({rules:s.rules.map(r=>r.id==="clutch"?{...r,m:"Trucks · tested, not active"}:r), screen:"rules"})); toast("Saved as draft. It won't run."); },
+    toggleRule: id => setS(s=>{ const r=s.rules.find(x=>x.id===id); const ns=r.status==="On"?"Paused":"On"; const t=stamp(s);
+      return {...s, clock:s.clock+1, rules:s.rules.map(x=>x.id===id?{...x,status:ns}:x), activity:[{time:t, who:"You", what:`${ns==="Paused"?"Paused":"Resumed"} rule: ${r.t}`, why:ns==="Paused"?"It won't act until resumed":""}, ...s.activity]}; }),
+  };
+
+  const dc = decisionCount(S);
+  const navKey = PARENT[S.screen] && !NAV.find(n=>n[0]===S.screen) ? PARENT[S.screen] : S.screen;
+  const Screen = {today:Today, proposal:Proposal, evidence:Evidence, review:Review, track:Track, rule:RuleScreen, decisions:Decisions, theft:Theft, assets:Assets, rules:Rules, activity:Activity}[S.screen];
+
+  return <div className="app">
+    <nav className="rail" aria-label="Main">
+      <div className="brand"><i/>SuprFleet</div>
+      {NAV.map(([k,l])=><button key={k} className="nav" aria-current={navKey===k?"page":undefined} onClick={()=>go(k)}>{l}{k==="decisions" && dc>0 && <span className="count" aria-label={`${dc} decisions waiting for you`}>{dc}</span>}</button>)}
+      <div className="who"><b>Vikram Deshmukh</b>Head of Operations<br/>{COMPANY}<br/>500 assets · 38 sites</div>
+    </nav>
+    <div className="main">
+      <div className="top">
+        <div className="crumbs">{PARENT[S.screen] && <><button onClick={()=>go(PARENT[S.screen])}>{TITLES[PARENT[S.screen]]}</button><span>/</span></>}<span style={{color:"var(--ink)"}}>{TITLES[S.screen]}</span></div>
+        <span className={"fresh"+(S.mode==="stale"?" bad":"")}>{S.mode==="stale"?"140 assets 3 h behind":S.mode==="empty"?"312 of 500 reporting":S.mode==="loading"?"Loading…":"Updated 08:40 · 477 of 500 reporting"}</span>
+        <button className="askbtn" onClick={()=>setAskOpen("")}>Ask about your fleet<kbd>⌘K</kbd></button>
+      </div>
+      <Screen S={S} A={A}/>
+    </div>
+
+    {askOpen!==null && <Ask initial={askOpen||null} close={()=>setAskOpen(null)}/>}
+
+    {modal?.type==="exclude" && <Modal title="Exclude a truck from the plan" onClose={()=>setModal(null)}>
+      <label className="sm muted" htmlFor="exclude-id">Truck</label>
+      <select id="exclude-id" value={modal.id} onChange={e=>setModal({...modal,id:e.target.value})} style={{padding:"8px",borderRadius:6,border:"1px solid var(--line2)",background:"var(--paper)",color:"var(--ink)",font:"inherit"}}>
+        {TRUCKS.filter(t=>!S.excluded.has(t.id)).map(t=><option key={t.id} value={t.id}>{t.id} · {t.route}</option>)}
+      </select>
+      <p className="muted sm">Why? It updates this plan and improves future proposals.</p>
+      <div className="radio">{[["serviced","Clutch was serviced recently at an outside garage"],["sale","Truck is about to be sold or retired"],["other","Something else"]].map(([v,l])=><label key={v}><input type="radio" name="reason" id={"reason-"+v} checked={reason===v} onChange={()=>setReason(v)}/><span>{l}</span></label>)}</div>
+      {reason==="other" && <textarea id="reason-text" value={reasonText} onChange={e=>setReasonText(e.target.value)} placeholder="What should we know?"/>}
+      <div className="row"><button className="btn primary" disabled={reason==="other"&&!reasonText.trim()} onClick={()=>{const id=modal.id; setModal(null);
+        act("You",`Excluded ${id} from the clutch plan`, reason==="serviced"?"Serviced at an outside garage":reason==="sale"?"About to be sold":reasonText.slice(0,60), s=>{const e=new Set(s.excluded); e.add(id); return {excluded:e}});
+        const e=new Set(S.excluded); e.add(id); const q=draft({...S,excluded:e}); toast(`Plan updated: ${q.n} trucks, est. net benefit ${lakh(q.net)}.`)}}>Exclude and update plan</button><button className="btn ghost" onClick={()=>setModal(null)}>Keep it in</button></div>
+    </Modal>}
+
+    {modal?.type==="notnow" && <Modal title={modal.disagree?"Disagree with this proposal":"Not now"} onClose={()=>setModal(null)}>
+      <p className="muted sm">If you wait past Friday 9 Oct, this week's quiet slots are lost.</p>
+      <div className="radio">
+        {!modal.disagree && <label><input type="radio" name="nn" id="nn-later" checked={nn==="later"} onChange={()=>setNn("later")}/><span><b>Remind me Monday 12 Oct.</b> <span className="muted">It comes back with fresh data.</span></span></label>}
+        <label><input type="radio" name="nn" id="nn-disagree" checked={nn==="disagree"||!!modal.disagree} onChange={()=>setNn("disagree")}/><span><b>I disagree with this proposal.</b> <span className="muted">It won't come back unless the evidence changes.</span></span></label>
+      </div>
+      {(nn==="disagree"||modal.disagree) && <textarea id="nn-why" value={nnWhy} onChange={e=>setNnWhy(e.target.value)} placeholder="Why? For example: these trucks are being replaced next month."/>}
+      <div className="row"><button className="btn primary" disabled={(nn==="disagree"||modal.disagree)&&!nnWhy.trim()} onClick={()=>{const dis = nn==="disagree"||modal.disagree; setModal(null);
+        if(!dis){ act("You","Snoozed the clutch proposal until Mon 12 Oct","",{pstatus:"snoozed"}); toast("We'll bring this back on Monday 12 Oct."); }
+        else { act("You","Disagreed with the clutch proposal",nnWhy.slice(0,60),{pstatus:"dismissed"}); setNnWhy(""); toast("Recorded. It won't come back unless the evidence changes."); }}}>Confirm</button><button className="btn ghost" onClick={()=>setModal(null)}>Cancel</button></div>
+    </Modal>}
+
+    {modal?.type==="reqcancel" && <Modal title={`Request cancellation for ${modal.id}`} onClose={()=>setModal(null)}>
+      <p className="sm">The vendor has confirmed this slot ({slotLabel(modal.slot)}). Cancelling now is a request, not an instant cancellation.</p>
+      <ul className="sm muted" style={{margin:0,paddingLeft:18}}><li>Free if the vendor accepts more than 24 h before the slot.</li><li>Within 24 h, the vendor may charge ₹500.</li><li>The truck stays booked until the vendor accepts.</li></ul>
+      <div className="row"><button className="btn primary" onClick={()=>{const id=modal.id; setModal(null); act("You",`Requested cancellation for ${id}`,"Waiting for vendor to accept",s=>({slots:{...s.slots,[id]:"cancel_requested"}})); toast("Cancellation requested. Waiting for the vendor.")}}>Send request</button><button className="btn ghost" onClick={()=>setModal(null)}>Keep the slot</button></div>
+    </Modal>}
+
+    {modal?.type==="issue" && <Modal title={`Raise an issue for ${modal.id}`} onClose={()=>setModal(null)}>
+      <p className="sm muted">Work has started or finished, so it can't be cancelled. Rahul Patil will follow up with the vendor.</p>
+      <textarea id="issue-why" value={issueWhy} onChange={e=>setIssueWhy(e.target.value)} placeholder="What went wrong? For example: clutch still slipping after service."/>
+      <div className="row"><button className="btn primary" disabled={!issueWhy.trim()} onClick={()=>{const id=modal.id; setModal(null); act("You",`Raised an issue for ${id}`,issueWhy.slice(0,60),s=>({slots:{...s.slots,[id]:"issue"}})); setIssueWhy(""); toast("Issue raised. Rahul Patil is following up.")}}>Raise issue</button><button className="btn ghost" onClick={()=>setModal(null)}>Cancel</button></div>
+    </Modal>}
+
+    {modal?.type==="rebook" && <Modal title={`Other slots for ${modal.id}`} onClose={()=>setModal(null)}>
+      <div className="radio">
+        {[[[14,14],"Sai Auto Works, Bhiwandi"],[[15,10],"Om Motors, Chakan"],[[16,9],"Shree Garage, Nashik"]].map(([sl,vn],i)=><button key={i} className="btn" style={{textAlign:"left"}} onClick={()=>A.rebook(modal.id, sl, vn)}>{slotLabel(sl)} · {vn}</button>)}
+      </div>
+      <div className="row"><button className="btn ghost" onClick={()=>setModal(null)}>Close</button></div>
+    </Modal>}
+
+    {modal?.type==="falsealarm" && <Modal title="Mark as a false alarm" onClose={()=>setModal(null)}>
+      <p className="sm muted">This closes the case. Give a reason; it's logged and shared with Sunita Rao and Arjun Nair.</p>
+      <textarea id="fa-why" value={faWhy} onChange={e=>setFaWhy(e.target.value)} placeholder="For example: driver confirmed a sanctioned transfer to MH12-AB-1240."/>
+      <div className="row"><button className="btn primary" disabled={!faWhy.trim()} onClick={()=>{setModal(null); act("You","Closed the fuel-loss case as a false alarm",faWhy.slice(0,60),(s,t)=>({incident:{...s.incident,status:"closed",falseAlarm:faWhy,closedAt:t}})); setFaWhy(""); toast("Case closed as a false alarm. Reason logged.")}}>Close case</button><button className="btn ghost" onClick={()=>setModal(null)}>Cancel</button></div>
+    </Modal>}
+
+    {toastMsg && <div className="toast" role="status">{toastMsg}</div>}
+
+    <div className="demo" aria-label="Prototype controls">
+      <button className="reset" onClick={reset}>Reset demo</button>
+      <span className="sep"/>
+      <span className="lbl">Story</span>
+      {STORY.map(([k,l])=><button key={k} aria-pressed={S.screen===k} onClick={()=>{ if(k==="track"){ setS(s=>({...s, ...ensureApproved(s), screen:"track"})); window.scrollTo({top:0}); } else go(k); }}>{l}</button>)}
+      <span className="sep"/>
+      <span className="lbl">State</span>
+      <select id="demo-state" value={S.mode} onChange={e=>{const m=e.target.value; setToastMsg(null); setModal(null); setAskOpen(null); setS(()=> m==="failed" ? (()=>{const b={...INITIAL(), mode:m}; return {...b, ...ensureApproved(b), view:"d5", screen:"track"}})() : {...INITIAL(), mode:m, screen:"today"}); window.scrollTo({top:0})}} aria-label="Demo state">
+        <option value="normal">Normal day</option><option value="loading">Loading</option><option value="empty">New account</option>
+        <option value="stale">Stale data</option><option value="failed">Action failed</option><option value="dense">Dense day (500 assets)</option>
+      </select>
+    </div>
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>

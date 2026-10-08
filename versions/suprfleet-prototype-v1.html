@@ -1,0 +1,780 @@
+<title>SuprFleet 2030 Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<style>
+/* Layout: narrow left rail · main working column · optional right Ask panel. Calm porcelain surface, cobalt for actions, serif only for the system's answers. */
+:root{
+  --paper:#F3F4F1; --surface:#FFFFFF; --sunk:#EEF0EC; --ink:#18212B; --ink2:#4D5966; --ink3:#7A8591; --line:#DDE1DB; --line2:#C9CEC7;
+  --accent:#2446C9; --accent-ink:#FFFFFF; --accent-soft:#E8EDFB;
+  --money:#11704A; --money-soft:#E3F2EA; --warn:#9A5800; --warn-soft:#FBF0DE; --crit:#B3261E; --crit-soft:#FBE8E6; --stale:#6A6F78; --stale-soft:#ECEDEF;
+  --f-ui:"Geist", "Segoe UI", system-ui, sans-serif; --f-say:"Newsreader", Georgia, "Times New Roman", serif;
+  --r-s:6px; --r-m:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#12161B; --surface:#1A2027; --sunk:#151A20; --ink:#E9ECEF; --ink2:#AEB6BF; --ink3:#808A95; --line:#2A323B; --line2:#3A434D;
+  --accent:#7D97FF; --accent-ink:#0E1424; --accent-soft:#1E2847; --money:#5CC995; --money-soft:#16312A; --warn:#F0B35A; --warn-soft:#352813;
+  --crit:#FF8A80; --crit-soft:#3A1A18; --stale:#A2A8B1; --stale-soft:#252B32; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#12161B; --surface:#1A2027; --sunk:#151A20; --ink:#E9ECEF; --ink2:#AEB6BF; --ink3:#808A95; --line:#2A323B; --line2:#3A434D;
+  --accent:#7D97FF; --accent-ink:#0E1424; --accent-soft:#1E2847; --money:#5CC995; --money-soft:#16312A; --warn:#F0B35A; --warn-soft:#352813;
+  --crit:#FF8A80; --crit-soft:#3A1A18; --stale:#A2A8B1; --stale-soft:#252B32; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--paper);color:var(--ink);font:14px/1.5 var(--f-ui);font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:208px minmax(0,1fr);min-height:100%}
+.rail{border-right:1px solid var(--line);padding:18px 12px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh;background:var(--paper)}
+.brand{font-weight:600;font-size:15px;padding:4px 10px 16px;display:flex;align-items:center;gap:8px}
+.brand i{width:18px;height:18px;border-radius:5px;background:var(--ink);display:inline-block;position:relative}
+.brand i::after{content:"";position:absolute;inset:5px;border-radius:2px;background:var(--paper)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;white-space:nowrap;padding:8px 10px;border-radius:var(--r-s);border:0;background:none;text-align:left;cursor:pointer;color:var(--ink2)}
+.nav:hover{background:var(--sunk);color:var(--ink)}
+.nav[aria-current="page"]{background:var(--surface);color:var(--ink);font-weight:500;box-shadow:0 0 0 1px var(--line)}
+.count{font-size:12px;min-width:20px;text-align:center;padding:0 6px;border-radius:999px;background:var(--warn-soft);color:var(--warn);font-weight:600}
+.rail .who{margin-top:auto;padding:10px;font-size:12.5px;color:var(--ink3);border-top:1px solid var(--line)}
+.rail .who b{display:block;color:var(--ink);font-weight:500}
+.main{min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--paper);z-index:5}
+.crumbs{display:flex;gap:6px;align-items:center;color:var(--ink3);font-size:13px;min-width:0;flex-wrap:wrap}
+.crumbs button{border:0;background:none;padding:0;color:var(--ink2);cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line2)}
+.fresh{margin-left:auto;font-size:12.5px;color:var(--ink3);white-space:nowrap}
+.fresh.bad{color:var(--warn)}
+.askbtn{display:flex;align-items:center;gap:10px;border:1px solid var(--line2);background:var(--surface);border-radius:999px;padding:6px 8px 6px 14px;cursor:pointer;color:var(--ink2);min-width:220px}
+.askbtn kbd{font:12px var(--f-ui);border:1px solid var(--line);border-radius:5px;padding:0 6px;color:var(--ink3);margin-left:auto}
+.page{padding:26px 28px 120px;max-width:1120px;width:100%;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{margin:0;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+h1{font-size:22px} h2{font-size:17px} h3{font-size:15px}
+p{margin:0}
+.say{font-family:var(--f-say);font-weight:400;font-size:clamp(24px,2.6vw,32px);line-height:1.2;letter-spacing:-.01em;max-width:30ch;text-wrap:balance}
+.say.s{font-size:22px;max-width:40ch}
+.muted{color:var(--ink2)} .faint{color:var(--ink3)} .sm{font-size:13px} .xs{font-size:12px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.spread{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:12px;min-width:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px}
+@media (max-width:980px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel.flush{padding:0;gap:0}
+.panel .ph{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:16px 18px 10px}
+.btn{border:1px solid var(--line2);background:var(--surface);border-radius:var(--r-s);padding:8px 14px;cursor:pointer;font-weight:500;white-space:nowrap}
+.btn:hover{border-color:var(--ink3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{border-color:transparent;background:none;color:var(--ink2);padding-inline:8px}
+.btn.ghost:hover{color:var(--ink);background:var(--sunk)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.link{border:0;background:none;padding:0;color:var(--accent);cursor:pointer;font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.crit{background:var(--crit-soft);color:var(--crit)} .chip.ok{background:var(--money-soft);color:var(--money)}
+.chip.stale{background:var(--stale-soft);color:var(--stale)} .chip.info{background:var(--accent-soft);color:var(--accent)} .chip.line{border:1px solid var(--line2);color:var(--ink2)}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+
+/* Safety strip */
+.urgent{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;background:var(--crit-soft);border:1px solid color-mix(in srgb,var(--crit) 35%,transparent);border-radius:var(--r-m);padding:12px 16px}
+.urgent .ic{width:28px;height:28px;border-radius:50%;background:var(--crit);color:#fff;display:grid;place-items:center;font-weight:700}
+@media (max-width:700px){.urgent{grid-template-columns:1fr}}
+
+/* Vitals */
+.vitals{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r-m);background:var(--surface)}
+.vital{padding:14px 16px;display:flex;flex-direction:column;gap:2px;border-right:1px solid var(--line);min-width:0;text-align:left;background:none;border-top:0;border-bottom:0;border-left:0}
+.vital:last-child{border-right:0}
+.vital .k{font-size:12.5px;color:var(--ink3)}
+.vital .v{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.vital .d{font-size:12px;color:var(--ink2)}
+.vital.button{cursor:pointer} .vital.button:hover{background:var(--sunk)}
+.vital .v small{font-size:14px;color:var(--ink3);font-weight:500}
+@media (max-width:900px){.vitals{grid-template-columns:repeat(2,minmax(0,1fr))}.vital{border-bottom:1px solid var(--line)}}
+
+/* Lists */
+.item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:14px 18px;border-top:1px solid var(--line);align-items:center;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;width:100%}
+.item.button{cursor:pointer} .item.button:hover{background:var(--sunk)}
+.item .t{font-weight:500}
+.item .m{font-size:13px;color:var(--ink2)}
+.item .n{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.item .n b{font-weight:600}
+.est{border-bottom:1px dashed currentColor}
+.mix{display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--ink2)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+
+/* Tables */
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{text-align:left;padding:10px 14px;border-top:1px solid var(--line);vertical-align:middle;font-size:13.5px}
+th{font-weight:500;color:var(--ink3);font-size:12.5px;border-top:0;padding-top:4px}
+tr.out td{color:var(--ink3);text-decoration:line-through;text-decoration-color:var(--line2)}
+tr.out td:last-child{text-decoration:none}
+
+/* Money receipt */
+.receipt{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 20px;font-size:13.5px}
+.receipt .r{text-align:right}
+.receipt .tot{font-weight:600;border-top:1px solid var(--line);padding-top:6px}
+.figures{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r-m)}
+.fig{padding:12px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
+.fig:last-child{border-right:0}
+.fig .k{font-size:12.5px;color:var(--ink3)}
+.fig .v{font-size:20px;font-weight:600}
+.fig.pos .v{color:var(--money)}
+@media (max-width:800px){.figures{grid-template-columns:repeat(2,minmax(0,1fr))}.fig{border-bottom:1px solid var(--line)}}
+
+/* Evidence ledger: the signature element */
+.ledger{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r-m);background:var(--surface)}
+.lcol{padding:16px 18px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--line);min-width:0}
+.lcol:last-child{border-right:0}
+.lcol h3{display:flex;gap:8px;align-items:center}
+.ev{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;font-size:13.5px}
+.ev .mk{width:18px;height:18px;border-radius:4px;display:grid;place-items:center;font-size:11px;font-weight:700;margin-top:1px}
+.mk.sup{background:var(--money-soft);color:var(--money)} .mk.mis{background:var(--stale-soft);color:var(--stale);border:1px dashed var(--stale)} .mk.alt{background:var(--warn-soft);color:var(--warn)}
+.ev .src{font-size:12px;color:var(--ink3)}
+.weight{display:inline-flex;gap:2px;vertical-align:middle;margin-left:4px}
+.weight i{width:6px;height:10px;border-radius:1px;background:var(--line2)}
+.weight i.on{background:var(--ink2)}
+@media (max-width:900px){.ledger{grid-template-columns:1fr}.lcol{border-right:0;border-bottom:1px solid var(--line)}}
+
+.notice{display:flex;gap:12px;align-items:flex-start;border-radius:var(--r-m);padding:12px 14px;font-size:13.5px}
+.notice.info{background:var(--accent-soft)} .notice.ok{background:var(--money-soft)} .notice.warn{background:var(--warn-soft)} .notice.crit{background:var(--crit-soft)} .notice.stale{background:var(--stale-soft)}
+.notice b{font-weight:600}
+
+/* Stepper */
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0}
+.step{display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:3px solid var(--line);font-size:13px;color:var(--ink3);padding-right:10px}
+.step.done{border-color:var(--money);color:var(--ink)}
+.step.now{border-color:var(--accent);color:var(--ink)}
+.step.fail{border-color:var(--crit);color:var(--ink)}
+.step b{font-weight:600;font-size:13.5px}
+@media (max-width:760px){.steps{grid-template-columns:1fr 1fr}}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:var(--r-s);overflow:hidden}
+.seg button{border:0;background:var(--surface);padding:6px 12px;cursor:pointer;font-size:13px;color:var(--ink2);border-right:1px solid var(--line2)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+
+/* Rule builder */
+.rule{font-size:16px;line-height:2.1;max-width:62ch}
+.tok{display:inline-block;border:1px solid var(--line2);background:var(--sunk);border-radius:6px;padding:0 8px;line-height:1.7;font-weight:500}
+.tok.lock{border-style:dashed;color:var(--ink3);background:none}
+.hist{display:grid;grid-template-columns:repeat(26,1fr);gap:3px;align-items:end;height:56px}
+.hist i{display:block;border-radius:2px;background:var(--line)}
+.hist i.m{background:var(--money)} .hist i.r{background:var(--warn)} .hist i.x{background:var(--stale);opacity:.6}
+
+/* Skeleton */
+.sk{background:linear-gradient(90deg,var(--sunk),var(--line),var(--sunk));background-size:200% 100%;animation:sh 1.4s linear infinite;border-radius:6px}
+@keyframes sh{to{background-position:-200% 0}}
+@media (prefers-reduced-motion: reduce){.sk{animation:none}}
+
+/* Ask panel */
+.scrim{position:fixed;inset:0;background:rgba(10,14,20,.28);z-index:20}
+.ask{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);border-left:1px solid var(--line);z-index:21;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.ask header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border-bottom:1px solid var(--line)}
+.ask .body{padding:18px;display:flex;flex-direction:column;gap:14px;overflow:auto;flex:1}
+.ask input{width:100%;border:1px solid var(--line2);border-radius:var(--r-s);padding:10px 12px;background:var(--paper);color:var(--ink);font:inherit}
+.sugg{display:flex;flex-direction:column;gap:6px}
+.sugg button{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:var(--r-s);padding:9px 12px;cursor:pointer}
+.sugg button:hover{border-color:var(--ink3)}
+.answer{border:1px solid var(--line);border-radius:var(--r-m);padding:14px;display:flex;flex-direction:column;gap:10px}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bars div{display:grid;grid-template-columns:120px minmax(0,1fr) 56px;gap:8px;align-items:center;font-size:12.5px}
+.bars span.b{height:8px;border-radius:4px;background:var(--accent)}
+
+/* Prototype controls (not product UI) */
+.demo{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:15;background:var(--ink);color:var(--paper);border-radius:12px;padding:8px;display:flex;gap:6px;align-items:center;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;max-width:calc(100% - 24px);box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.demo .lbl{font-size:12px;opacity:.7;padding:0 6px}
+.demo button{border:0;background:transparent;color:inherit;border-radius:7px;padding:6px 9px;cursor:pointer;font-size:12.5px;opacity:.82}
+.demo button:hover{opacity:1;background:rgba(255,255,255,.08)}
+.demo button[aria-pressed="true"]{background:var(--paper);color:var(--ink);opacity:1}
+.demo select{background:transparent;color:inherit;border:1px solid rgba(255,255,255,.25);border-radius:7px;padding:5px 6px;font:12.5px var(--f-ui)}
+.demo select option{color:#111}
+.demo .sep{width:1px;height:20px;background:rgba(255,255,255,.2)}
+
+.toast{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;z-index:30;font-size:13.5px}
+.modal{position:fixed;inset:0;display:grid;place-items:center;z-index:25;padding:16px}
+.modal .box{background:var(--surface);border-radius:12px;border:1px solid var(--line);max-width:520px;width:100%;padding:20px;display:flex;flex-direction:column;gap:14px}
+.radio{display:flex;flex-direction:column;gap:6px}
+.radio label{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--r-s);padding:10px 12px;cursor:pointer}
+.radio input{margin-top:3px}
+textarea{width:100%;min-height:64px;border:1px solid var(--line2);border-radius:var(--r-s);padding:8px 10px;background:var(--paper);color:var(--ink);font:inherit}
+
+@media (max-width:760px){
+  .app{grid-template-columns:1fr}
+  .rail{position:static;height:auto;flex-direction:row;overflow-x:auto;padding:10px 12px;border-right:0;border-bottom:1px solid var(--line)}
+  .brand{padding:4px 8px}
+  .rail .who{display:none}
+  .top{padding:12px 16px;flex-wrap:wrap}
+  .askbtn{min-width:0;flex:1 1 100%;white-space:nowrap}
+  .askbtn kbd{display:none}
+  .crumbs{flex:1 1 100%}
+  .fresh{margin-left:0;white-space:normal}
+  .page{padding:20px 16px 160px}
+}
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.25.6/babel.min.js"></script>
+<script type="text/babel" data-presets="react">
+const {useState, useEffect, useMemo} = React;
+
+/* ---------- Data (illustrative) ---------- */
+const FAIL_COST = 54000;          // ₹38,000 repair + tow + 2 days × ₹8,000 revenue
+const P_FAIL = 0.45;              // model likelihood within 90 days (illustrative)
+const PARTS = 5000;               // parts + labour per truck
+const DOWNTIME = 1000;            // revenue lost in a planned half-day
+const TRUCKS = [
+  {id:"MH12-RT-4471", route:"Chakan → Nashik", sig:"Strong", seen:"08:31", slot:"Fri 10 Oct, 14:00"},
+  {id:"MH04-KL-2210", route:"Bhiwandi → Kasara", sig:"Moderate", seen:"26 h ago", stale:true, slot:"Sat 11 Oct, 09:00"},
+  {id:"MH43-BG-9012", route:"Bhiwandi → Nashik", sig:"Strong", seen:"08:36", slot:"Fri 10 Oct, 16:00"},
+  {id:"MH12-TQ-1187", route:"Chakan → Bhiwandi", sig:"Strong", seen:"08:38", slot:"Sat 11 Oct, 11:00"},
+  {id:"MH15-HX-3301", route:"Nashik → Bhiwandi", sig:"Moderate", seen:"08:12", slot:"Sun 12 Oct, 09:00"},
+  {id:"MH04-JP-7754", route:"Bhiwandi → Kasara", sig:"Strong", seen:"08:40", slot:"Sun 12 Oct, 11:00"},
+  {id:"MH12-SV-6620", route:"Chakan → Nashik", sig:"Moderate", seen:"08:29", slot:"Mon 13 Oct, 09:00"},
+  {id:"MH43-CE-0458", route:"Bhiwandi → Kasara", sig:"Strong", seen:"08:35", slot:"Mon 13 Oct, 11:00"},
+  {id:"MH15-NA-2246", route:"Nashik → Chakan", sig:"Strong", seen:"08:22", slot:"Tue 14 Oct, 09:00"},
+  {id:"MH04-WD-8890", route:"Bhiwandi → Kasara", sig:"Moderate", seen:"07:58", slot:"Tue 14 Oct, 11:00"},
+];
+const MIX = [
+  {k:"Trucks", n:260, c:"#2446C9"}, {k:"Generators", n:120, c:"#11704A"},
+  {k:"Inverters & batteries", n:80, c:"#9A5800"}, {k:"Solar charging stations", n:40, c:"#7A5AB8"},
+];
+const inr = n => "₹" + Math.round(n).toLocaleString("en-IN");
+const lakh = n => "₹" + (n/100000).toFixed(2).replace(/\.?0+$/,"") + " L";
+
+function plan(excluded){
+  const n = TRUCKS.filter(t=>!excluded.has(t.id)).length;
+  const parts = n*PARTS, down = n*DOWNTIME, cost = parts+down;
+  const expected = n*P_FAIL, avoided = expected*FAIL_COST;
+  return {n, parts, down, cost, expected, avoided, net: avoided-cost, breakeven: Math.max(1, Math.ceil(cost/FAIL_COST - 1e-9))};
+}
+
+/* ---------- Small parts ---------- */
+const Chip = ({tone="line", children}) => <span className={"chip "+tone}>{children}</span>;
+const Weight = ({n}) => <span className="weight" aria-label={`weight ${n} of 3`}>{[1,2,3].map(i=><i key={i} className={i<=n?"on":""}/>)}</span>;
+
+function Vitals({state, go}){
+  const stale = state==="stale";
+  const dense = state==="dense";
+  const v = [
+    {k:"Assets working", v:<>{dense?"402":"431"} <small>/ 500</small></>, d:dense?"72 stopped by flooding":"18 idle, 28 in planned service"},
+    {k:"Revenue today, estimated", v:<span className="est">{dense?"₹11.6 L":"₹14.2 L"}</span>, d:dense?"−18% vs a usual Thursday":"+3% vs a usual Thursday"},
+    {k:"Needs your decision", v:dense?"7":"3", d:dense?"62 issues, grouped by cause":"1 due Friday", go:"decisions"},
+    {k:"Handled by your rules", v:"14", d:"since 18:00 yesterday", go:"activity"},
+    {k:"Not reporting", v:stale?"140":"23", d:stale?"Bhiwandi network outage":"14 in low-network corridor", go:"assets"},
+  ];
+  return <div className="vitals">{v.map((x,i)=>{
+    const Tag = x.go ? "button" : "div";
+    return <Tag key={i} className={"vital"+(x.go?" button":"")} onClick={x.go?()=>go(x.go):undefined}>
+      <span className="k">{x.k}{stale && i<2 ? " *" : ""}</span><span className="v">{x.v}</span><span className="d">{x.d}</span>
+    </Tag>})}</div>;
+}
+
+/* ---------- Screens ---------- */
+function Today({state, go, excluded, toast}){
+  if(state==="loading") return <div className="page" aria-busy="true">
+    <div className="sk" style={{height:56}}/><div className="sk" style={{height:70,maxWidth:620}}/><div className="sk" style={{height:84}}/>
+    <div className="grid2"><div className="sk" style={{height:300}}/><div className="sk" style={{height:300}}/></div>
+    <p className="faint sm">Reading the latest data from 500 assets…</p></div>;
+  if(state==="empty") return <div className="page">
+    <h1>Welcome, Vikram</h1>
+    <p className="say s">Your 500 assets are connected. First answers in about 20 minutes, once we've seen a full cycle of data.</p>
+    <div className="panel">
+      <h2>Getting ready</h2>
+      <div className="col sm">
+        <div className="row"><Chip tone="ok">Done</Chip> 500 of 500 devices connected</div>
+        <div className="row"><Chip tone="info">In progress</Chip> Data received from 312 of 500 assets</div>
+        <div className="row"><Chip tone="line">To do</Chip> Set your approval limit and who to call for urgent issues</div>
+        <div className="row"><Chip tone="line">To do</Chip> Add service records from outside garages (makes proposals more accurate)</div>
+      </div>
+      <div className="row"><button className="btn primary" onClick={()=>go("rules")}>Set approval limit</button><button className="btn">Import service records</button></div>
+    </div>
+    <div className="notice stale"><span>Nothing needs your decision yet. While we learn your fleet, nothing will run on its own.</span></div>
+  </div>;
+
+  const dense = state==="dense";
+  const p = plan(excluded);
+  return <div className="page">
+    {state==="stale" && <div className="notice warn"><b>Data is 3 hours old for 140 assets.</b><span>Network outage at Bhiwandi since 05:40. Figures marked * may be out of date. Proposals that depend on these assets are paused.</span></div>}
+    {state==="failed" && <div className="notice crit"><b>1 action didn't go through.</b><span>Sai Auto Works cancelled the slot for MH04-KL-2210. <button className="link" onClick={()=>go("track")}>Pick a new slot</button></span></div>}
+
+    <div className="urgent" role="alert">
+      <span className="ic" aria-hidden="true">!</span>
+      <div><b>Suspected fuel theft, MH12-AB-1234 at Chakan, 02:10.</b> <span className="muted">Escalated to Sunita Rao (Safety lead) at 02:12. She hasn't reviewed it yet.</span></div>
+      <div className="row"><button className="btn sm" onClick={()=>go("theft")}>Review evidence</button></div>
+    </div>
+
+    <div className="col" style={{gap:14}}>
+      <span className="faint sm">Thursday 8 October · the one thing that matters this week</span>
+      {dense
+        ? <p className="say">Flooding at Bhiwandi has stopped 72 trucks. Rerouting 23 of them via Thane keeps ₹4.1 lakh of deliveries on time.</p>
+        : <p className="say">One decision this week protects about {lakh(p.net)}: service {p.n} trucks that show early clutch wear.</p>}
+      <div className="row">
+        <button className="btn primary" onClick={()=>go(dense?"decisions":"proposal")}>{dense?"See the 7 decisions":"Review the proposal"}</button>
+        <button className="btn ghost" onClick={()=>go("ask")}>Ask why</button>
+      </div>
+    </div>
+
+    <Vitals state={state} go={go}/>
+
+    <div className="grid2">
+      <div className="panel flush">
+        <div className="ph"><h2>Needs your decision</h2><button className="link sm" onClick={()=>go("decisions")}>See all</button></div>
+        {(dense ? DENSE_GROUPS.slice(0,4) : liveDecisions(p)).map((d,i)=>
+          <button key={i} className="item button" onClick={()=>go(d.to||"decisions")}>
+            <div><div className="t">{d.t}</div><div className="m">{d.m}</div></div>
+            <div className="n"><b className={d.pos?"est":""}>{d.v}</b><span className="faint xs">{d.when}</span></div>
+          </button>)}
+      </div>
+      <div className="col">
+        <div className="panel flush">
+          <div className="ph"><h2>Handled by your rules</h2><span className="faint sm">since 18:00</span></div>
+          {HANDLED.map((h,i)=><div key={i} className="item">
+            <div><div className="t">{h.t}</div><div className="m">{h.m}</div></div>
+            <div className="n">{h.cancel ? <button className="btn sm" onClick={()=>toast("Cancelled before the vendor confirmed. No charge.")}>Cancel</button> : <Chip tone="ok">Done</Chip>}</div>
+          </div>)}
+        </div>
+        <div className="panel">
+          <div className="spread"><h2>Data we're missing</h2><Chip tone="stale">{state==="stale"?"140 assets":"23 assets"}</Chip></div>
+          <div className="col sm muted" style={{gap:6}}>
+            {state==="stale" ? <span>140 assets at Bhiwandi: network outage since 05:40</span> : <>
+            <span>14 trucks in the Kasara ghat low-network corridor; data will sync when they're back in coverage</span>
+            <span>6 generators at Nashik offline since a site power cut at 04:00</span>
+            <span>3 devices haven't reported for 2 days and need a check</span></>}
+          </div>
+          <div className="row"><button className="link sm" onClick={()=>go("assets")}>See the list</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div className="panel">
+      <div className="spread"><h2>Your 500 assets</h2><span className="faint sm">Every asset type, one view</span></div>
+      <div className="mix" role="img" aria-label="Asset mix: 260 trucks, 120 generators, 80 inverters and batteries, 40 solar charging stations">{MIX.map(m=><span key={m.k} style={{flex:m.n,background:m.c}}/>)}</div>
+      <div className="legend">{MIX.map(m=><span key={m.k}><i className="dot" style={{background:m.c}}/>{m.k} {m.n}</span>)}</div>
+    </div>
+  </div>;
+}
+const DECISIONS = [
+  {t:"Service 10 trucks for early clutch wear", m:"Decide by Fri 10 Oct to use this week's quiet slots", v:"Est. ₹1.83 L net", pos:true, when:"Cost ₹60,000", to:"proposal"},
+  {t:"Generator DG-118, Hinjewadi: fuel use up 18%", m:"Likely injector wear. Inspection ₹3,500", v:"Est. ₹22,000/mo", pos:true, when:"Above rule limit"},
+  {t:"6 solar stations producing 14% below forecast", m:"Dust on panels after the dry spell. Cleaning ₹12,000", v:"Est. ₹40,000/mo", pos:true, when:"Vendor free Sat"},
+];
+function liveDecisions(p){ return [{...DECISIONS[0], t:`Service ${p.n} trucks for early clutch wear`, v:`Est. ${lakh(p.net)} net`, when:`Cost ${inr(p.cost)}`}, ...DECISIONS.slice(1)]; }
+const DENSE_GROUPS = [
+  {t:"Flooding at Bhiwandi: 72 trucks stopped", m:"One decision covers 23 deliveries: reroute via Thane (+₹18,000 fuel)", v:"₹4.1 L on time", when:"Decide by 11:00"},
+  {t:"Grid outage, Nashik: 14 generators running", m:"Fuel lasts ~9 hours. Refuel 6 by 16:00", v:"₹96,000 fuel", when:"Decide by 13:00"},
+  {t:"Clutch wear on 10 trucks", m:"Same as yesterday; still fits Friday slots", v:"Est. ₹1.83 L net", when:"By Fri", to:"proposal"},
+  {t:"Inverter temperatures high at 3 sites", m:"Heat + load. Shift charging to night", v:"₹0", when:"Today"},
+  {t:"Permit renewals: 9 trucks", m:"Grouped into one filing", v:"₹27,000", when:"By 20 Oct"},
+  {t:"Operator coaching: 5 operators", m:"Harsh acceleration on wet roads", v:"Est. ₹9,000/mo", when:"This week"},
+  {t:"3 devices offline 2+ days", m:"Field visit needed", v:"₹2,400", when:"This week"},
+];
+const HANDLED = [
+  {t:"Booked panel cleaning for SOL-07, Chakan", m:"₹1,800, within your ₹5,000 rule. Vendor confirms by 10:00", cancel:true},
+  {t:"Told 4 operators their trucks were idling over 45 min", m:"Bhiwandi depot, 21:10–23:40"},
+  {t:"Raised a ticket for INV-022 temperature", m:"Assigned to Rahul Patil"},
+  {t:"Moved 3 permit reminders to next week", m:"Offices closed for the holiday"},
+];
+
+function Proposal({excluded, setExcluded, go, openAsk}){
+  const p = plan(excluded);
+  const [showWork, setShowWork] = useState(false);
+  return <div className="page">
+    <div className="spread">
+      <div className="col" style={{gap:8}}>
+        <div className="row"><Chip tone="warn">Needs your decision</Chip><span className="faint sm">Decide by Fri 10 Oct, 18:00 to use this week's quiet slots</span></div>
+        <h1>Service {p.n} trucks for early clutch wear</h1>
+        <p className="muted" style={{maxWidth:"70ch"}}>These Tata Signa 4825 trucks show the same clutch pattern as the 4 that broke down last quarter. Servicing them on their quietest days costs less than waiting for failures on the road.</p>
+      </div>
+      <button className="btn ghost" onClick={openAsk}>Ask about this</button>
+    </div>
+
+    <div className="figures">
+      <div className="fig"><span className="k">Cost to act</span><span className="v">{inr(p.cost)}</span><span className="faint xs">{inr(p.parts)} service + {inr(p.down)} planned downtime</span></div>
+      <div className="fig pos"><span className="k">Estimated loss avoided</span><span className="v est">{lakh(p.avoided)}</span><span className="faint xs">over the next 90 days</span></div>
+      <div className="fig pos"><span className="k">Estimated net benefit</span><span className="v est">{lakh(p.net)}</span><span className="faint xs">an estimate, not a saving yet</span></div>
+      <div className="fig"><span className="k">Breaks even if it prevents</span><span className="v">{p.breakeven} failure{p.breakeven>1?"s":""}</span><span className="faint xs">of ~{p.expected.toFixed(1)} expected</span></div>
+    </div>
+    <div><button className="link sm" onClick={()=>setShowWork(!showWork)} aria-expanded={showWork}>{showWork?"Hide":"Show"} how we worked this out</button></div>
+    {showWork && <div className="panel"><div className="receipt">
+      <span>Trucks in plan</span><span className="r">{p.n}</span>
+      <span>Likelihood each fails within 90 days (model, illustrative)</span><span className="r">45%</span>
+      <span>Expected failures if we wait ({p.n} × 45%)</span><span className="r">{p.expected.toFixed(1)}</span>
+      <span>Cost of one failure: ₹38,000 repair and tow + 2 days off the road × ₹8,000</span><span className="r">{inr(FAIL_COST)}</span>
+      <span className="tot">Estimated loss avoided</span><span className="r tot">{inr(p.avoided)}</span>
+      <span>Service, ₹5,000 × {p.n}</span><span className="r">− {inr(p.parts)}</span>
+      <span>Revenue lost in a planned half-day, ₹1,000 × {p.n}</span><span className="r">− {inr(p.down)}</span>
+      <span className="tot">Estimated net benefit</span><span className="r tot">{inr(p.net)}</span>
+    </div><p className="faint xs">Actual results are measured 90 days after service and shown separately.</p></div>}
+
+    <div className="panel flush">
+      <div className="ph"><h2>Trucks in this plan</h2><span className="faint sm">{p.n} of 10 included</span></div>
+      <div className="tw"><table>
+        <thead><tr><th>Truck</th><th>Usual route</th><th>Evidence</th><th>Last data</th><th></th></tr></thead>
+        <tbody>{TRUCKS.map(t=>{
+          const out = excluded.has(t.id);
+          return <tr key={t.id} className={out?"out":""}>
+            <td><b style={{fontWeight:500}}>{t.id}</b></td><td>{t.route}</td>
+            <td><Chip tone={t.sig==="Strong"?"ok":"line"}>{t.sig}</Chip></td>
+            <td>{t.stale ? <Chip tone="stale">{t.seen}</Chip> : <span className="faint">Today {t.seen}</span>}</td>
+            <td style={{textAlign:"right"}}>{out
+              ? <button className="link sm" onClick={()=>{const s=new Set(excluded); s.delete(t.id); setExcluded(s)}}>Add back</button>
+              : <button className="link sm" onClick={()=>go("exclude:"+t.id)}>Exclude</button>}</td>
+          </tr>})}</tbody></table></div>
+    </div>
+
+    <div className="row">
+      <button className="btn" onClick={()=>go("evidence")}>Check the evidence</button>
+      <button className="btn primary" onClick={()=>go("review")}>Review and approve</button>
+      <button className="btn ghost" onClick={()=>go("notnow")}>Not now</button>
+    </div>
+  </div>;
+}
+
+function Evidence({excluded, go, openAsk}){
+  const p = plan(excluded);
+  return <div className="page">
+    <div className="spread">
+      <div className="col" style={{gap:8}}>
+        <h1>Why we think these trucks need a clutch service</h1>
+        <p className="muted" style={{maxWidth:"72ch"}}>What supports it, what we couldn't see, and what else it could be. Data as of today 08:40. Model scores here are illustrative.</p>
+      </div>
+      <button className="btn" onClick={openAsk}>Question this</button>
+    </div>
+
+    <div className="ledger">
+      <div className="lcol">
+        <h3>What supports it</h3>
+        <div className="ev"><span className="mk sup">+</span><div>Clutch slip events up 3.2× in 30 days on all {p.n} trucks <Weight n={3}/><div className="src">Vehicle data · CAN bus · 30 days</div></div></div>
+        <div className="ev"><span className="mk sup">+</span><div>Clutch engages ~180 rpm higher than when new <Weight n={3}/><div className="src">Vehicle data · engine and gearbox signals</div></div></div>
+        <div className="ev"><span className="mk sup">+</span><div>The 4 trucks that failed last quarter showed this pattern 5–7 weeks before <Weight n={2}/><div className="src">Your service history · 4 cases</div></div></div>
+        <div className="ev"><span className="mk sup">+</span><div>7 of these trucks run the Kasara ghat climb with heavy loads <Weight n={1}/><div className="src">Trip and route data</div></div></div>
+      </div>
+      <div className="lcol">
+        <h3>What we couldn't see</h3>
+        <div className="ev"><span className="mk mis">?</span><div>Service records from outside garages aren't in SuprFleet. A recent clutch job elsewhere would make a truck a false positive.<div className="src">Missing source</div></div></div>
+        <div className="ev"><span className="mk mis">?</span><div>MH04-KL-2210 last reported 26 hours ago (low-network corridor). Its evidence is a day old.<div className="src">Freshness</div></div></div>
+        <div className="ev"><span className="mk mis">?</span><div>No load-sensor data on 3 trucks, so we estimated their loads from trip weight slips.<div className="src">Partial data</div></div></div>
+      </div>
+      <div className="lcol">
+        <h3>Other explanations we checked</h3>
+        <div className="ev"><span className="mk alt">~</span><div><b style={{fontWeight:500}}>Operator technique.</b> Less likely: on 8 of 10 trucks the pattern continues across 2 or more operators.</div></div>
+        <div className="ev"><span className="mk alt">~</span><div><b style={{fontWeight:500}}>Sensor fault.</b> Unlikely: three independent signals agree.</div></div>
+        <div className="ev"><span className="mk alt">~</span><div><b style={{fontWeight:500}}>Overloading.</b> Contributes on 7 trucks, but doesn't explain the other 3.</div></div>
+      </div>
+    </div>
+
+    <div className="panel">
+      <div className="spread"><h2>Not convinced? Change the plan</h2><span className="faint sm">Your reason teaches the model and is logged</span></div>
+      <div className="row">
+        <button className="btn" onClick={()=>go("exclude:MH12-RT-4471")}>Exclude a truck</button>
+        <button className="btn" onClick={openAsk}>Ask why these 10 and not the other 18 of this model</button>
+        <button className="btn ghost" onClick={()=>go("notnow")}>Disagree with the whole proposal</button>
+      </div>
+      {excluded.size>0 && <div className="notice info"><b>Plan updated.</b><span>{p.n} trucks · cost {inr(p.cost)} · estimated net benefit {lakh(p.net)}. We've asked Rahul Patil to upload the outside service record so this doesn't come up again.</span></div>}
+    </div>
+    <div className="row"><button className="btn" onClick={()=>go("proposal")}>Back to the proposal</button><button className="btn primary" onClick={()=>go("review")}>Review and approve</button></div>
+  </div>;
+}
+
+function Review({excluded, go, approve}){
+  const p = plan(excluded);
+  const [notify, setNotify] = useState(true);
+  const list = TRUCKS.filter(t=>!excluded.has(t.id));
+  return <div className="page">
+    <div className="col" style={{gap:8}}><h1>Review before you approve</h1><p className="muted">Exactly what will happen, who owns it, and what it costs.</p></div>
+    <div className="grid2">
+      <div className="panel flush">
+        <div className="ph"><h2>Schedule</h2><span className="faint sm">Each truck's quietest day</span></div>
+        {list.map(t=><div key={t.id} className="item"><div><div className="t">{t.id}</div><div className="m">{t.route}</div></div><div className="n"><span className="sm">{t.slot}</span><span className="faint xs">4 h at Sai Auto Works, Bhiwandi</span></div></div>)}
+      </div>
+      <div className="col">
+        <div className="panel">
+          <h2>Spend</h2>
+          <div className="receipt">
+            <span>Service, parts and labour ({p.n} trucks)</span><span className="r">{inr(p.parts)}</span>
+            <span className="faint">Revenue lost in planned downtime (not a payment)</span><span className="r faint">{inr(p.down)}</span>
+            <span className="tot">You're approving a payment of</span><span className="r tot">{inr(p.parts)}</span>
+          </div>
+          <div className="notice ok sm"><span>Within your approval limit of ₹50,000. Above Rahul's ₹10,000 limit, so it needed you.</span></div>
+        </div>
+        <div className="panel">
+          <h2>Who owns it</h2>
+          <div className="row sm"><span className="dot" style={{background:"var(--accent)"}}/>Rahul Patil, Maintenance lead, confirms each slot with the vendor</div>
+          <div className="row sm"><span className="dot" style={{background:"var(--line2)"}}/>Vendor: Sai Auto Works. 2 others can do these dates <button className="link sm">Compare</button></div>
+          <label className="row sm" style={{cursor:"pointer"}}><input type="checkbox" id="notify-ops" checked={notify} onChange={e=>setNotify(e.target.checked)}/> Tell the 9 operators about their service day</label>
+        </div>
+        <div className="notice info sm"><span>You can cancel any slot until the vendor confirms it, usually within 2 hours. Once work starts it can't be undone; you can raise an issue with the vendor instead.</span></div>
+        <div className="row"><button className="btn primary" onClick={approve}>Approve {inr(p.parts)} and schedule</button><button className="btn ghost" onClick={()=>go("proposal")}>Back</button></div>
+      </div>
+    </div>
+  </div>;
+}
+
+function Track({excluded, go, when, setWhen, failed, setFailed, toast}){
+  const p = plan(excluded);
+  const list = TRUCKS.filter(t=>!excluded.has(t.id));
+  const steps = ["Approved","Scheduled","In service","Completed","Outcome checked"];
+  return <div className="page">
+    <div className="spread">
+      <div className="col" style={{gap:8}}><div className="row"><Chip tone="info">In progress</Chip><span className="faint sm">Approved by you, Thu 8 Oct 11:42</span></div><h1>Clutch service, {p.n} trucks</h1></div>
+      <div className="col" style={{gap:6,alignItems:"flex-end"}}><span className="faint xs">See this plan</span>
+        <div className="seg" role="group" aria-label="Point in time">
+          <button aria-pressed={when==="now"} onClick={()=>setWhen("now")}>Today</button>
+          <button aria-pressed={when==="d4"} onClick={()=>setWhen("d4")}>In 5 days</button>
+          <button aria-pressed={when==="d90"} onClick={()=>setWhen("d90")}>In 90 days</button>
+        </div></div>
+    </div>
+    <div className="steps">{steps.map((s,i)=>{
+      const doneUpTo = when==="now" ? 1 : when==="d4" ? 1 : 4;
+      const cls = when==="d90" ? "done" : i<=doneUpTo ? "done" : (i===2 ? ((when==="d4" && failed) ? "fail" : when==="d4" ? "now" : "") : "");
+      const sub = [ "Thu 8 Oct", when==="now"?"9 of 9 slots confirmed":"9 of 9 slots", when==="d4"?(failed?"7 done, 1 in service, 1 slot cancelled":"8 done, 1 in service"):when==="d90"?"All done":"Starts Fri 10 Oct", when==="d90"?"Tue 14 Oct":"—", when==="d90"?"Checked 12 Jan":"Due 12 Jan"][i];
+      return <div key={s} className={"step "+cls}><b>{s}</b><span>{sub}</span></div>})}</div>
+
+    {when==="d4" && failed && <div className="notice crit"><div className="col" style={{gap:8}}>
+      <span><b>Sai Auto Works cancelled the slot for MH04-KL-2210</b> (mechanic unavailable). Nothing was charged.</span>
+      <div className="row"><button className="btn sm primary" onClick={()=>{setFailed(false); toast("Rebooked: Mon 13 Oct 14:00 at Om Motors. Rahul has been told.")}}>Rebook Mon 13 Oct 14:00, Om Motors</button><button className="btn sm">Other options</button></div>
+    </div></div>}
+
+    {when==="d90" ? <div className="grid2">
+      <div className="panel">
+        <h2>What happened</h2>
+        <p className="say s">No clutch failures in this group in 90 days. We expected about {Math.round(p.expected)} without the service.</p>
+        <div className="receipt">
+          <span>Estimated cost before approval</span><span className="r">{inr(p.parts)}</span>
+          <span>Actual spend (one truck needed a pressure plate)</span><span className="r">{inr(p.parts+2300)}</span>
+          <span>Clutch failures observed</span><span className="r">0</span>
+          <span className="tot">Estimated loss avoided</span><span className="r tot est">{lakh(p.avoided)}</span>
+        </div>
+        <p className="faint xs">Avoided loss is an estimate based on what similar trucks did, not money on your books. Actual spend comes from vendor invoices.</p>
+      </div>
+      <div className="panel">
+        <h2>You've approved 5 proposals like this one</h2>
+        <p className="muted sm">All 5 were clutch or brake wear on 3 or more trucks of one model, under ₹50,000. You could let SuprFleet book these for you within limits you set, and test it on past cases first.</p>
+        <div><button className="btn primary" onClick={()=>go("rule")}>Try an automation rule</button></div>
+      </div>
+    </div> :
+    <div className="panel flush">
+      <div className="ph"><h2>Trucks</h2><span className="faint sm">Owner: Rahul Patil</span></div>
+      {list.map((t,i)=>{
+        let st = <Chip tone="info">Scheduled · {t.slot}</Chip>;
+        if(when==="d4"){ st = (t.id==="MH04-KL-2210" && failed) ? <Chip tone="crit">Slot cancelled</Chip> : i===list.length-1 ? <Chip tone="warn">In service</Chip> : <Chip tone="ok">Completed</Chip>; }
+        return <div key={t.id} className="item"><div><div className="t">{t.id}</div><div className="m">{t.route}</div></div><div className="n">{st}{when==="now" && <button className="link xs" onClick={()=>toast("Slot cancelled before the vendor started. No charge.")}>Cancel slot</button>}</div></div>})}
+    </div>}
+  </div>;
+}
+
+function RuleScreen({go, toast}){
+  const [tested, setTested] = useState(false);
+  const [mode, setMode] = useState(null);
+  const bars = useMemo(()=>Array.from({length:26},(_,i)=>{
+    const map = {3:"m",7:"m",11:"r",14:"m",18:"x",21:"m",24:"m"};
+    return map[i] || "";}),[]);
+  return <div className="page">
+    <div className="col" style={{gap:8}}><h1>New automation rule</h1><p className="muted">Narrow on purpose. Test it on the last 6 months before it does anything.</p></div>
+    <div className="panel">
+      <p className="rule">When <span className="tok">3 or more trucks of the same model</span> show <span className="tok">clutch or brake wear</span> with <span className="tok">strong evidence</span>, and the service costs <span className="tok">under ₹50,000</span> in total, <span className="tok">book the preferred vendor on each truck's quietest day</span> and <span className="tok">tell me after</span>.</p>
+      <p className="sm muted">This rule can never: <span className="tok lock">control a vehicle</span> <span className="tok lock">change routes</span> <span className="tok lock">spend above ₹50,000</span> <span className="tok lock">act on assets marked for sale</span></p>
+      <div className="row"><button className="btn primary" onClick={()=>setTested(true)} disabled={tested}>Test on the last 6 months</button></div>
+    </div>
+    {tested && <div className="panel">
+      <div className="spread"><h2>It would have run 7 times</h2><span className="faint sm">Apr – Sep 2026</span></div>
+      <div className="hist" role="img" aria-label="Weekly timeline: 5 matched your decisions, 1 you rejected, 1 skipped for stale data">{bars.map((b,i)=><i key={i} className={b} style={{height:b?"100%":"20%"}}/>)}</div>
+      <div className="legend"><span><i className="dot" style={{background:"var(--money)"}}/>5 match what you approved</span><span><i className="dot" style={{background:"var(--warn)"}}/>1 you rejected</span><span><i className="dot" style={{background:"var(--stale)"}}/>1 skipped: data was stale</span></div>
+      <div className="notice warn sm"><span><b>The one you rejected, 2 Jul:</b> those trucks were about to be sold. We've added "not on assets marked for sale" to the rule.</span></div>
+      <div className="receipt"><span>Spend it would have booked</span><span className="r">₹2,10,000</span><span>Estimated loss avoided (illustrative)</span><span className="r est">₹8,30,000</span></div>
+      <h3 style={{marginTop:6}}>How should it run?</h3>
+      <div className="radio">
+        <label><input type="radio" name="mode" id="mode-ask" checked={mode==="ask"} onChange={()=>setMode("ask")}/><span><b>Ask me first.</b> <span className="muted">It prepares the booking; you approve in one tap.</span></span></label>
+        <label><input type="radio" name="mode" id="mode-act" checked={mode==="act"} onChange={()=>setMode("act")}/><span><b>Book it and tell me.</b> <span className="muted">You can cancel until the vendor confirms (about 2 hours). Requires the Delegate plan.</span></span></label>
+      </div>
+      <div className="row"><button className="btn primary" disabled={!mode} onClick={()=>{toast(mode==="ask"?"Rule on: it will ask you first.":"Rule on: it will book and tell you."); go("rules")}}>Turn on rule</button><button className="btn ghost" onClick={()=>go("rules")}>Save as draft</button></div>
+    </div>}
+  </div>;
+}
+
+function Decisions({state, go, excluded}){
+  const dense = state==="dense"; const p = plan(excluded);
+  return <div className="page">
+    <div className="spread"><div className="col" style={{gap:6}}><h1>Needs your decision</h1><p className="muted">{dense?"62 issues today, grouped into 7 causes. Safety first, then by money at stake.":"Safety first, then by money at stake and deadline."}</p></div></div>
+    <div className="urgent"><span className="ic" aria-hidden="true">!</span><div><b>Suspected fuel theft, MH12-AB-1234.</b> <span className="muted">With Sunita Rao, Safety lead.</span></div><button className="btn sm" onClick={()=>go("theft")}>Review evidence</button></div>
+    <div className="panel flush">{(dense?DENSE_GROUPS:liveDecisions(p)).map((d,i)=>
+      <button key={i} className="item button" onClick={()=>go(d.to||"proposal")}><div><div className="t">{d.t}</div><div className="m">{d.m}</div></div><div className="n"><b className={d.pos?"est":""}>{d.v}</b><span className="faint xs">{d.when}</span></div></button>)}</div>
+  </div>;
+}
+
+function Theft({go}){
+  return <div className="page">
+    <div className="col" style={{gap:8}}><div className="row"><Chip tone="crit">Urgent · safety</Chip><span className="faint sm">Escalated 02:12 to Sunita Rao</span></div>
+      <h1>Suspected fuel theft, MH12-AB-1234</h1>
+      <p className="muted" style={{maxWidth:"70ch"}}>Safety and theft cases always come before cost proposals. SuprFleet doesn't take vehicle-control actions on its own; a person reviews first.</p></div>
+    <div className="ledger">
+      <div className="lcol"><h3>What supports it</h3>
+        <div className="ev"><span className="mk sup">+</span><div>Fuel level dropped 40 L in 6 minutes <Weight n={3}/><div className="src">Fuel sensor · 02:04–02:10</div></div></div>
+        <div className="ev"><span className="mk sup">+</span><div>Engine off, truck stationary at an unlisted lay-by <Weight n={2}/><div className="src">Trip data</div></div></div>
+        <div className="ev"><span className="mk sup">+</span><div>Tank cap sensor opened at 02:03 <Weight n={2}/><div className="src">Accessory sensor</div></div></div></div>
+      <div className="lcol"><h3>What we couldn't see</h3>
+        <div className="ev"><span className="mk mis">?</span><div>Cab camera offline since 23:50<div className="src">Missing source</div></div></div>
+        <div className="ev"><span className="mk mis">?</span><div>No fuel card transaction to compare against<div className="src">Missing source</div></div></div></div>
+      <div className="lcol"><h3>Other explanations</h3>
+        <div className="ev"><span className="mk alt">~</span><div><b style={{fontWeight:500}}>Refuel at an unlisted pump.</b> Unlikely: fuel went down, not up.</div></div>
+        <div className="ev"><span className="mk alt">~</span><div><b style={{fontWeight:500}}>Sensor glitch.</b> Possible: this sensor glitched once in August. Level hasn't recovered, which argues against it.</div></div></div>
+    </div>
+    <div className="row"><button className="btn primary">Call the operator</button><button className="btn">Add a note for Sunita</button><button className="btn ghost">Mark as false alarm</button></div>
+    <p className="faint xs">Vehicle-control actions (like immobilising) are outside this prototype.</p>
+  </div>;
+}
+
+function Simple({title, children}){ return <div className="page"><h1>{title}</h1>{children}</div>; }
+function Assets(){
+  return <Simple title="Assets">
+    <div className="panel"><div className="mix">{MIX.map(m=><span key={m.k} style={{flex:m.n,background:m.c}}/>)}</div><div className="legend">{MIX.map(m=><span key={m.k}><i className="dot" style={{background:m.c}}/>{m.k} {m.n}</span>)}</div></div>
+    <div className="panel flush"><div className="ph"><h2>Not reporting</h2><span className="faint sm">23</span></div>
+      {[["14 trucks","Kasara ghat low-network corridor","Will sync on return"],["6 generators","Nashik site power cut since 04:00","Check after power returns"],["3 devices","No data for 2 days","Field visit needed"]].map((r,i)=><div key={i} className="item"><div><div className="t">{r[0]}</div><div className="m">{r[1]}</div></div><div className="n"><span className="sm muted">{r[2]}</span></div></div>)}</div>
+    <p className="faint sm">Asset detail pages are outside this prototype.</p></Simple>;
+}
+function Rules(){
+  return <Simple title="Automation rules">
+    <p className="muted">What SuprFleet can do on its own, and its limits. Safety cases and anything over ₹50,000 always come to you.</p>
+    <div className="panel flush">{[["Book panel cleaning under ₹5,000","Solar stations · books and tells you","On"],["Notify operators idling over 45 min","Trucks · no cost","On"],["Raise tickets for temperature alerts","Inverters · no cost","On"],["Clutch and brake service under ₹50,000","Trucks · draft, tested on 6 months","Draft"]].map((r,i)=><div key={i} className="item"><div><div className="t">{r[0]}</div><div className="m">{r[1]}</div></div><div className="n"><Chip tone={r[2]==="On"?"ok":"line"}>{r[2]}</Chip></div></div>)}</div>
+    <div className="panel"><h2>Your limits</h2><div className="receipt"><span>You can approve up to</span><span className="r">₹50,000</span><span>Rahul Patil (Maintenance) up to</span><span className="r">₹10,000</span><span>Rules can spend up to, per action</span><span className="r">₹5,000</span><span>Urgent issues at night go to</span><span className="r">Sunita Rao, then you</span></div></div>
+  </Simple>;
+}
+function Activity(){
+  return <Simple title="Activity">
+    <p className="muted">Everything people and rules did, with the reason.</p>
+    <div className="panel flush">{[["02:12","Rule","Escalated suspected fuel theft to Sunita Rao","Safety cases always go to a person"],["21:40","Rule","Told 4 operators about idling","Rule: idling over 45 min"],["20:05","Rule","Booked panel cleaning SOL-07, ₹1,800","Rule: cleaning under ₹5,000"],["18:30","Rahul Patil","Raised ticket for INV-022","Temperature above limit"],["17:10","You","Excluded MH12-RT-4471 from a proposal","Clutch replaced at an outside garage"]].map((r,i)=><div key={i} className="item"><div><div className="t">{r[2]}</div><div className="m">{r[1]} · {r[3]}</div></div><div className="n"><span className="faint sm">{r[0]}</span></div></div>)}</div></Simple>;
+}
+
+/* ---------- Ask layer ---------- */
+function Ask({close}){
+  const [a, setA] = useState(null);
+  const Q = ["Why these 10 trucks and not the other 18 of this model?","Why is fuel cost up 8% this month?","Which site lost the most revenue this week?"];
+  return <><div className="scrim" onClick={close}/>
+  <aside className="ask" aria-label="Ask about your fleet">
+    <header><h2>Ask about your fleet</h2><button className="btn ghost sm" onClick={close}>Close</button></header>
+    <div className="body">
+      <input id="ask-input" placeholder="Ask a question in your words" onKeyDown={e=>{if(e.key==="Enter") setA(1)}}/>
+      {!a && <div className="sugg"><span className="faint xs">Suggested from today's issues</span>{Q.map((q,i)=><button key={i} onClick={()=>setA(i===0?0:1)}>{q}</button>)}</div>}
+      {a===0 && <div className="answer">
+        <span className="faint xs">Answer · based on 28 Tata Signa 4825 trucks, last 30 days</span>
+        <p className="say s">The other 18 don't show the slip pattern yet. Most run flat routes with lighter loads.</p>
+        <div className="bars">
+          <div><span>These 10</span><span className="b" style={{width:"100%"}}/><span>3.2×</span></div>
+          <div><span>Other 18</span><span className="b" style={{width:"34%",background:"var(--ink3)"}}/><span>1.1×</span></div>
+        </div>
+        <p className="faint xs">Slip events vs each truck's own baseline. Sources: vehicle data, trip data.</p>
+        <div className="row"><button className="btn sm" onClick={close}>Back to the proposal</button><button className="btn sm ghost">Watch the other 18</button></div>
+      </div>}
+      {a===1 && <div className="answer">
+        <span className="faint xs">Answer · all trucks, Sep vs Aug</span>
+        <p className="say s">Most of the 8% is idling at Bhiwandi while vans wait for loading.</p>
+        <div className="bars">
+          <div><span>Idling, Bhiwandi</span><span className="b" style={{width:"62%"}}/><span>62%</span></div>
+          <div><span>Ghat route loads</span><span className="b" style={{width:"23%"}}/><span>23%</span></div>
+          <div><span>Diesel price</span><span className="b" style={{width:"15%"}}/><span>15%</span></div>
+        </div>
+        <div className="row"><button className="btn sm primary">Propose a later start at Bhiwandi</button><button className="btn sm ghost" onClick={()=>setA(null)}>Ask something else</button></div>
+      </div>}
+    </div>
+  </aside></>;
+}
+
+/* ---------- App ---------- */
+const STORY = [["today","1 Today"],["proposal","2 Proposal"],["evidence","3 Evidence"],["review","4 Approve"],["track","5 Track"],["rule","6 Automation"]];
+const NAV = [["today","Today"],["decisions","Needs your decision"],["assets","Assets"],["rules","Automation rules"],["activity","Activity"]];
+const TITLES = {today:"Today",proposal:"Proposal",evidence:"Evidence",review:"Review and approve",track:"Clutch service",rule:"New automation rule",decisions:"Needs your decision",assets:"Assets",rules:"Automation rules",activity:"Activity",theft:"Urgent case"};
+const PARENT = {proposal:"decisions",evidence:"proposal",review:"proposal",track:"decisions",rule:"rules",theft:"decisions"};
+
+function App(){
+  const [screen, setScreen] = useState("today");
+  const [state, setState] = useState("normal");
+  const [excluded, setExcluded] = useState(new Set());
+  const [askOpen, setAskOpen] = useState(false);
+  const [modal, setModal] = useState(null);
+  const [toastMsg, setToastMsg] = useState(null);
+  const [when, setWhen] = useState("now");
+  const [failed, setFailed] = useState(true);
+  const [reason, setReason] = useState("serviced");
+
+  useEffect(()=>{ const k=e=>{ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==="k"){e.preventDefault();setAskOpen(true)} if(e.key==="Escape"){setAskOpen(false);setModal(null)} }; window.addEventListener("keydown",k); return ()=>window.removeEventListener("keydown",k)},[]);
+  useEffect(()=>{ if(!toastMsg) return; const t=setTimeout(()=>setToastMsg(null),3200); return ()=>clearTimeout(t)},[toastMsg]);
+  useEffect(()=>{ if(state==="failed"){setWhen("d4");setFailed(true)} },[state]);
+
+  const go = (to)=>{
+    if(to==="ask") return setAskOpen(true);
+    if(to==="notnow") return setModal({type:"notnow"});
+    if(to.startsWith("exclude:")) return setModal({type:"exclude", id:to.split(":")[1]});
+    setScreen(to); window.scrollTo({top:0});
+  };
+  const toast = m=>setToastMsg(m);
+  const approve = ()=>{ setWhen("now"); setScreen("track"); toast("Approved. Rahul Patil is confirming slots with the vendor."); window.scrollTo({top:0}); };
+  const dataBad = state==="stale";
+  const navKey = PARENT[screen] && !NAV.find(n=>n[0]===screen) ? PARENT[screen] : screen;
+
+  let body;
+  if(screen==="today") body=<Today state={state} go={go} excluded={excluded} toast={toast}/>;
+  else if(screen==="proposal") body=<Proposal excluded={excluded} setExcluded={setExcluded} go={go} openAsk={()=>setAskOpen(true)}/>;
+  else if(screen==="evidence") body=<Evidence excluded={excluded} go={go} openAsk={()=>setAskOpen(true)}/>;
+  else if(screen==="review") body=<Review excluded={excluded} go={go} approve={approve}/>;
+  else if(screen==="track") body=<Track excluded={excluded} go={go} when={when} setWhen={setWhen} failed={failed} setFailed={setFailed} toast={toast}/>;
+  else if(screen==="rule") body=<RuleScreen go={go} toast={toast}/>;
+  else if(screen==="decisions") body=<Decisions state={state} go={go} excluded={excluded}/>;
+  else if(screen==="theft") body=<Theft go={go}/>;
+  else if(screen==="assets") body=<Assets/>;
+  else if(screen==="rules") body=<Rules/>;
+  else body=<Activity/>;
+
+  return <div className="app">
+    <nav className="rail" aria-label="Main">
+      <div className="brand"><i/>SuprFleet</div>
+      {NAV.map(([k,l])=><button key={k} className="nav" aria-current={navKey===k?"page":undefined} onClick={()=>go(k)}>{l}{k==="decisions" && <span className="count">{state==="dense"?7:3}</span>}</button>)}
+      <div className="who"><b>Vikram Deshmukh</b>Head of Operations<br/>500 assets · 4 sites</div>
+    </nav>
+    <div className="main">
+      <div className="top">
+        <div className="crumbs">{PARENT[screen] && <><button onClick={()=>go(PARENT[screen])}>{TITLES[PARENT[screen]]}</button><span>/</span></>}<span style={{color:"var(--ink)"}}>{TITLES[screen]}</span></div>
+        <span className={"fresh"+(dataBad?" bad":"")}>{dataBad?"140 assets 3 h behind":state==="empty"?"Connecting…":"Updated 08:40 · 477 of 500 reporting"}</span>
+        <button className="askbtn" onClick={()=>setAskOpen(true)}>Ask about your fleet<kbd>⌘K</kbd></button>
+      </div>
+      {body}
+    </div>
+
+    {askOpen && <Ask close={()=>setAskOpen(false)}/>}
+
+    {modal && <div className="modal" role="dialog" aria-modal="true"><div className="scrim" onClick={()=>setModal(null)}/>
+      <div className="box" style={{position:"relative",zIndex:26}}>
+        {modal.type==="exclude" ? <>
+          <h2>Exclude {modal.id}?</h2>
+          <p className="muted sm">Tell us why. It updates this plan and teaches the model.</p>
+          <div className="radio">
+            {[["serviced","Clutch was serviced recently at an outside garage"],["sale","Truck is about to be sold or retired"],["other","Something else"]].map(([v,l])=><label key={v}><input type="radio" name="reason" id={"reason-"+v} checked={reason===v} onChange={()=>setReason(v)}/><span>{l}</span></label>)}
+          </div>
+          {reason==="other" && <textarea id="reason-text" placeholder="What should we know?"/>}
+          <div className="row"><button className="btn primary" onClick={()=>{const s=new Set(excluded); s.add(modal.id); setExcluded(s); setModal(null); toast("Plan updated: "+plan(s).n+" trucks, est. net "+lakh(plan(s).net)+".")}}>Exclude and update plan</button><button className="btn ghost" onClick={()=>setModal(null)}>Keep it in</button></div>
+        </> : <>
+          <h2>Not now</h2>
+          <p className="muted sm">If you wait, the quiet slots this week are lost. We'll bring it back with fresh data.</p>
+          <div className="radio">
+            <label><input type="radio" name="nn" id="nn-week" defaultChecked/><span>Remind me next Monday</span></label>
+            <label><input type="radio" name="nn" id="nn-disagree"/><span>I disagree with this proposal (tell us why)</span></label>
+          </div>
+          <div className="row"><button className="btn primary" onClick={()=>{setModal(null); toast("We'll bring this back on Monday 13 Oct.")}}>Confirm</button><button className="btn ghost" onClick={()=>setModal(null)}>Cancel</button></div>
+        </>}
+      </div></div>}
+
+    {toastMsg && <div className="toast" role="status">{toastMsg}</div>}
+
+    <div className="demo" aria-label="Prototype controls">
+      <span className="lbl">Story</span>
+      {STORY.map(([k,l])=><button key={k} aria-pressed={screen===k} onClick={()=>{ if(k==="track"){setWhen("now")} go(k)}}>{l}</button>)}
+      <span className="sep"/>
+      <span className="lbl">State</span>
+      <select id="demo-state" value={state} onChange={e=>{setState(e.target.value); setScreen(e.target.value==="failed"?"track":"today")}} aria-label="Demo state">
+        <option value="normal">Normal day</option><option value="loading">Loading</option><option value="empty">New account</option>
+        <option value="stale">Stale data</option><option value="failed">Action failed</option><option value="dense">Dense day (500 assets)</option>
+      </select>
+    </div>
+  </div>;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
