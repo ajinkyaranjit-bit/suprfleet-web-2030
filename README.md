@@ -16,13 +16,14 @@ The core flow: **Today → Proposal → Evidence → Approve → Track → Autom
 
 | Path | What it is |
 |---|---|
-| `index.html` | Prototype v3.2 (frozen), single file |
-| `versions/` | Earlier prototype versions (v1, v2, v3) and the first thinking board, kept for history |
+| `index.html` | Prototype v5: same flows as v3.2 with a refreshed visual layer (frosted glass, navy, motion) |
+| `versions/` | Earlier versions kept for history: v1, v2, v3, v3.2 (the version shown in the presentation deck), v4, and the first thinking board |
 
 ## Notes
 
 - Single-file HTML. React 18.3.1 and Babel standalone load from public CDNs, so it needs internet.
 - All data is illustrative. Model figures (for example the 45% → 8% failure chance) are assumptions to show the reasoning, not real predictions.
 - Timers are simulated. Switching state resets the demo.
-- Colour contrast has not been formally audited yet.
+- Text colours were checked against WCAG AA (4.5:1) on the card surfaces; a full accessibility audit is still to do.
+- Motion respects reduced-motion and reduced-transparency settings.
 - Next step: port to a component-based React app.
