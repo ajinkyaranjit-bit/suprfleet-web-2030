@@ -502,86 +502,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   :root{--glass:rgba(255,255,255,.96)}
   .hdr,.v5 .ask{backdrop-filter:none;-webkit-backdrop-filter:none}
 }
-
-/* ===== Today v5.1: one-sentence header, "Your move" timeline, compact side lists ===== */
-.th{display:flex;flex-direction:column;gap:0}
-.th-row{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:18px}
-.th-l{display:flex;flex-direction:column;gap:6px;min-width:0}
-.th-say{font-size:30px;font-weight:400;letter-spacing:-.025em;line-height:1.2;margin:0}
-.th-say span{color:var(--ink3)}
-.th-go{display:inline-flex;align-items:center;gap:10px;white-space:nowrap;flex:none}
-.th-go b{background:rgba(255,255,255,.22);border-radius:999px;padding:0 8px;font-weight:600}
-.v5 .th-bar{height:12px}
-.th-leg{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;margin-top:12px;font-size:13px;color:var(--ink2)}
-.th-leg b{color:var(--ink);font-weight:600;font-size:13px;display:inline;line-height:inherit;letter-spacing:0}
-.th-leg .sw{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}
-.th-leg .sw.r{background:var(--money)} .th-leg .sw.a{background:var(--warn)} .th-leg .sw.u{background:repeating-linear-gradient(45deg,var(--stale) 0 2px,#fff 2px 4px);box-shadow:inset 0 0 0 1px var(--stale)}
-.th-unv{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;border-radius:6px}
-.th-unv:hover .faint{color:var(--navy);text-decoration:underline}
-.th-tip{position:relative;color:var(--ink3);border-bottom:1px dotted var(--ink3);cursor:help;outline-offset:3px}
-.th-tip [role=tooltip]{position:absolute;left:0;top:calc(100% + 10px);width:320px;padding:12px 14px;border-radius:14px;background:var(--navy-2);color:#fff;font-size:12.5px;line-height:1.45;box-shadow:0 18px 36px -16px rgba(22,33,58,.6);opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;z-index:5}
-.th-tip:hover [role=tooltip],.th-tip:focus [role=tooltip]{opacity:1;visibility:visible;transform:none}
-.th-split{margin-left:auto}
-
-.tgrid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:24px;align-items:start}
-.tlw{display:flex;flex-direction:column;gap:14px}
-.mv{list-style:none;margin:0;padding:0 0 0 84px;position:relative;display:flex;flex-direction:column;gap:12px}
-.mv::before{content:"";position:absolute;left:58px;top:14px;bottom:14px;width:2px;background:rgba(22,33,58,.1);border-radius:2px}
-.mv-i{position:relative}
-.mv-time{position:absolute;left:-84px;top:20px;width:44px;text-align:right;font-size:12px;font-weight:600;color:var(--ink2);font-variant-numeric:tabular-nums}
-.mv-node{position:absolute;left:-31px;top:22px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px rgba(22,33,58,.15);background:var(--navy)}
-.mv-i.crit .mv-node{background:var(--crit)} .mv-i.warn .mv-node{background:var(--warn)}
-.mv-i.done .mv-node{background:#fff;box-shadow:0 0 0 2px var(--navy)}
-.mv-card{position:relative;display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 20px;border-radius:20px;background:var(--glass);border:1px solid var(--glass-line);box-shadow:var(--lift);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transition:transform .15s ease-out,box-shadow .15s,background-color .15s}
-.mv-i.crit .mv-card{box-shadow:inset 3px 0 0 var(--crit),var(--lift)}
-.mv-card:hover{background:rgba(255,255,255,.8);transform:translateY(-1px)}
-.mv-body{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
-.mv-open,.q-open{background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
-.mv-open::after,.q-open::after{content:"";position:absolute;inset:0;border-radius:inherit}
-.mv-open:focus-visible,.q-open:focus-visible{outline:none}
-.mv-open:focus-visible::after,.q-open:focus-visible::after{outline:2px solid var(--navy);outline-offset:2px}
-.mv-t{font-size:15px;font-weight:500;color:var(--ink)}
-.mv-m{font-size:13px;color:var(--ink2)}
-.mv-m b{font-weight:600;color:var(--ink)}
-.mv-i.done .mv-t{color:var(--ink2)}
-.mv-act{position:relative;z-index:1;display:flex;align-items:center;gap:12px;flex:none}
-.mv-more{display:inline-flex;align-items:center;gap:2px;font-size:12px;color:var(--ink3);pointer-events:none}
-.mv-card:hover .mv-more{color:var(--navy)}
-.mv-act .btn + .mv-more{font-size:0;gap:0}
-
-.q .qrow{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 24px;border-top:1px solid var(--line);transition:background-color .15s}
-.q .qrow:hover{background:rgba(255,255,255,.55)}
-.q .qrow > .chip{justify-self:start}
-.q .qrow:has(> .q-b:first-child){grid-template-columns:minmax(0,1fr) auto}
-.q-b{min-width:0}
-.q-t{font-size:14px;font-weight:500}
-.q-m{font-size:12.5px;color:var(--ink3);margin-top:1px}
-.q-a{position:relative;z-index:1;display:flex;align-items:center;gap:10px}
-.q-chev{color:var(--ink3);pointer-events:none}
-.q-v{font-size:13px;font-weight:500;color:var(--money);white-space:nowrap}
-.q .ph{padding-bottom:8px}
-
-.v5 .today > .th{animation:sf-in .45s cubic-bezier(.2,.8,.2,1) both}
-.v5 .mv-i{animation:sf-in .45s cubic-bezier(.2,.8,.2,1) both}
-.v5 .mv-i:nth-child(2){animation-delay:.06s} .v5 .mv-i:nth-child(3){animation-delay:.12s} .v5 .mv-i:nth-child(4){animation-delay:.18s} .v5 .mv-i:nth-child(5){animation-delay:.24s}
-
-.v5 .detail .panel h2{margin-bottom:6px}
-.v5 .detail .panel{display:flex;flex-direction:column;gap:12px}
-
-@media (max-width:1180px){.tgrid{grid-template-columns:1fr}}
-@media (max-width:760px){
-  .th-row{flex-direction:column;align-items:flex-start;gap:14px}
-  .th-say{font-size:24px}
-  .th-split{margin-left:0}
-  .th-tip [role=tooltip]{width:260px}
-  .mv{padding-left:22px}
-  .mv::before{left:4px}
-  .mv-time{position:static;display:block;text-align:left;width:auto;margin:0 0 4px}
-  .mv-node{left:-23px;top:3px}
-  .mv-card{flex-direction:column;align-items:flex-start}
-  .q .qrow{grid-template-columns:minmax(0,1fr) auto;padding:12px 18px}
-  .q .qrow > .chip{grid-column:1/-1}
-}
 </style>
 <div id="root"></div>
 
@@ -686,7 +606,7 @@ function decisions(S){
     return {morning:[], week:[], groups: groups.filter(g=>!g.done)};
   }
   const morning = [!S.dispatchAssigned && {id:"dispatch"}, S.fuel==="none" && {id:"fuel"}].filter(Boolean);
-  const week = [clutchOpen && {id:"clutch"}, !S.dg && {id:"dg"}, !S.solar && {id:"solar"}].filter(Boolean);
+  const week = [clutchOpen && {id:"clutch"}, {id:"dg"}, {id:"solar"}].filter(Boolean);
   return {morning, week, groups:[]};
 }
 const decisionCount = S => { const d=decisions(S); return S.mode==="dense" ? d.groups.length : d.morning.length + d.week.length; };
@@ -697,7 +617,7 @@ const INITIAL = () => ({
   excluded:new Set(), pstatus:"open", approved:null, partial:null,
   availReq:"none", vendor:"sai", partialOk:false, notify:true,
   slots:{}, view:"now", vendorFailed:true, rebooked:null, failId:null,
-  dispatchAssigned:false, fuel:"none", detail:null, nudged:{}, dg:null, solar:null,
+  dispatchAssigned:false, fuel:"none",
   incident:{owner:"Arjun Nair", ownerRole:"duty manager", status:"open", called:false, notes:[], falseAlarm:null},
   cleaning:"pending", reroute:false, cement:false, gridEscalated:false,
   rules:[
@@ -776,102 +696,118 @@ function Today({S, A}){
   </div>;
 
   const R = readiness(S), dense = S.mode==="dense", stale = S.mode==="stale";
-  const inc = S.incident, dc = decisionCount(S);
-  const D = R.rows[0], P = R.rows[1];
-
-  /* Header: one sentence, one bar, one action */
-  const header = <section className="th" aria-label="Today's readiness">
-    <div className="th-row">
-      <div className="th-l">
-        <span className="when">Thursday 8 October · 08:40 · {COMPANY}</span>
-        {dense
-          ? <h1 className="th-say">Flooding at Bhiwandi puts {R.tot.a} of today's {R.all} commitments at risk. <span>One reroute covers 23 of them.</span></h1>
-          : <h1 className="th-say">{R.tot.r} of {R.all} commitments ready. <span>{R.tot.a} at risk, {R.tot.u} unverified.</span></h1>}
-        {dense && <p className="sub sm muted">27 trucks with deliveries today are stopped. 23 can reroute via Thane. 4 cement loads for site 12 can't wait and need a separate decision.</p>}
-      </div>
-      <button className="btn primary th-go" onClick={()=>A.go("decisions")}>Review decisions{dc>0 && <b>{dc}</b>}</button>
-    </div>
-    <div className="rbar th-bar" role="img" aria-label={`${R.tot.r} ready, ${R.tot.a} at risk, ${R.tot.u} unverified`}><span className="r" style={{flex:R.tot.r}}/><span className="a" style={{flex:R.tot.a}}/><span className="u" style={{flex:R.tot.u}}/></div>
-    <div className="th-leg">
-      <span><i className="sw r"/><b><Num v={R.tot.r}/></b> ready</span>
-      <span><i className="sw a"/><b><Num v={R.tot.a}/></b> at risk</span>
-      <button className="th-unv" onClick={()=>A.go("assets")} title="See which commitments have no fresh data"><i className="sw u"/><b><Num v={R.tot.u}/></b> unverified<span className="faint"> · see which</span></button>
-      <span className="th-tip" tabIndex={0} aria-describedby="ready-def">What counts as ready?<span role="tooltip" id="ready-def">Commitments are today's truck departures plus sites that need power. Ready means the asset, operator and schedule were confirmed in the last hour. Missing data counts as unverified, not ready.</span></span>
-      <span className="th-split">Deliveries <b>{D.r}</b>/{D.r+D.a+D.u} · Site power <b>{P.r}</b>/{P.r+P.a+P.u}</span>
-    </div>
-  </section>;
-
-  /* Left: your move, in time order */
-  const cl = clutchLine(S);
-  const stop = e => e.stopPropagation();
-  const moves = dense ? [
-    {k:"safe", time:"Now", tone:"crit", pill:<Chip tone="crit">Safety · owner {inc.owner}</Chip>, t:"Fuel loss on MH12-AB-1234, theft suspected", m:"Seal broken at 06:10. Next: reach operator Sanjay More.", open:()=>A.go("theft"), label:"Open case"},
-    {k:"cement", time:"10:30", tone:"warn", t:"4 cement loads for site 12 can't wait for a reroute", m:S.cement?`Assigned to Kavita Rao at ${S.cementAt}. Waiting for her decision.`:"Pour starts 12:00. Owner: Kavita Rao, site 12 manager.", open:()=>A.go("decisions"), label:"See options"},
-    {k:"reroute", time:"11:00", tone:"warn", t:"Reroute 23 trucks via Thane", m:S.reroute?`Approved at ${S.rerouteAt}. 0 of 23 drivers confirmed.`:"23 deliveries to 8 sites · +₹18,000 fuel, about +1.5 h each", open:()=>A.go("decisions"), label:"Decide"},
-    {k:"grid", time:"13:00", tone:"warn", t:"Grid outage, Nashik: 6 sites on generators", m:S.gridEscalated?"Sent to the owner for approval.":`Refuel ${inr(900*FUEL.price+FUEL.delivery)}, above your ₹50,000 limit`, open:()=>A.go("decisions"), label:"Decide"},
-    {k:"clutch", time:"17:00", tone:"navy", t:cl.t, m:cl.m.replace("Decide by today, 17:00, so vendors","So vendors"), open:()=>A.go(cl.to), label:"Review"},
-  ] : [
-    {k:"safe", time:"Now", tone:"crit", pill:<Chip tone="crit">Safety · owner {inc.owner}</Chip>, t:"Fuel loss on MH12-AB-1234, theft suspected",
-      m:inc.status==="closed"?"Closed as a false alarm.":"Seal broken at 06:10. Next: reach operator Sanjay More, then decide on a police report.",
-      open:()=>A.go("theft"), label:"Open case and contact log",
-      act: inc.owner!=="You" && inc.status!=="closed" && <button className="btn sm" onClick={A.takeOwnership}>Take ownership</button>},
-    {k:"dispatch", time:"09:30", tone:"warn", done:S.dispatchAssigned, t:`${D.a} deliveries short of a truck or driver`,
-      m:S.dispatchAssigned ? <>Assigned to Priya Shah at {S.dispatchAt}. <b>0 of 8 replacements confirmed</b>; still at risk.</> : "5 trucks failed the morning check, 3 drivers called in sick. 4 standby trucks free at Bhiwandi.",
-      open:()=>A.open("dispatch"), label:"See the 8 deliveries",
-      act: !S.dispatchAssigned && <button className="btn primary sm" onClick={A.assignDispatch}>Assign to Priya Shah</button>},
-    {k:"fuel", time:"10:00", tone:"warn", done:S.fuel!=="none", t:`${P.a} sites low on generator fuel`,
-      m:S.fuel==="none" ? `${FUEL.litres} L refuel for sites ${FUEL.sites}. Runs dry from 12:30.`
-        : <>Approved {inr(FUEL.total)} at {S.fuelAt}. {S.fuel==="requested"?"Waiting for Bharat Fuels to confirm the tanker.":"Bharat Fuels confirmed: arriving about 11:30."} Sites stay at risk until fuel sensors confirm.</>,
-      open:()=>A.open("fuel"), label:"See cost and fuel levels",
-      act: S.fuel==="none" && <button className="btn primary sm" onClick={A.approveFuel}>Approve {inr(FUEL.total)}</button>},
-    {k:"clutch", time:"17:00", tone:"navy", done:S.pstatus!=="open", t:cl.t, m:S.pstatus==="open"?`${cl.v} · cost ${inr(shownPlan(S).cost)} · first slot Fri 9 Oct`:cl.m,
-      open:()=>A.go(cl.to), label:S.pstatus==="approved"?"Track service":"Review proposal"},
-  ];
-
-  const timeline = <section className="tlw" aria-labelledby="move-h">
-    <div className="secthead"><h2 id="move-h">Your move</h2><p>In order of deadline. Open any card for the evidence.</p></div>
-    <ol className="mv">
-      {moves.map(x=><li key={x.k} className={"mv-i "+x.tone+(x.done?" done":"")}>
-        <span className="mv-time">{x.time}</span><i className="mv-node" aria-hidden="true"/>
-        <div className="mv-card">
-          <div className="mv-body">
-            {x.pill}
-            <button className="mv-open" onClick={x.open} aria-label={`${x.t}. ${x.label}`}><span className="mv-t">{x.t}</span></button>
-            <div className="mv-m">{x.m}</div>
-          </div>
-          <div className="mv-act" onClick={stop}>{x.act}<span className="mv-more" aria-hidden="true">{x.label}<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="m9 18 6-6-6-6"/></svg></span></div>
+  const inc = S.incident;
+  const handover = <div className="panel">
+    <details className="fold" open={!A.narrow}>
+      <summary><div className="secthead"><h2>Overnight handover</h2><p>Since 18:00 yesterday · what happened, who owns it</p></div></summary>
+      <div style={{marginTop:6}}>
+        <div className="hrow"><div className="top2"><b>Panel cleaning for SOL-07</b><Chip tone={S.cleaning==="cancelled"?"stale":"warn"}>{S.cleaning==="cancelled"?"Cancelled":"Waiting for vendor"}</Chip></div>
+          <span className="sm muted">Requested by your rule (cleaning under ₹5,000). ₹1,800. Owner: Meera Joshi, site power.</span>
+          {S.cleaning==="cancelled" ? <span className="sm">You cancelled it at {S.cleaningAt}, before the vendor confirmed. No charge.</span>
+            : <><span className="sm muted">Not confirmed yet (due by 10:00), so it can still be cancelled free.</span><div><button className="link sm" onClick={A.cancelCleaning}>Cancel booking</button></div></>}
         </div>
-      </li>)}
-    </ol>
-  </section>;
-
-  /* Right: other people's move, then this week */
-  const row = (key, pill, t, m, open, act) => <div key={key} className="qrow">
-    {pill}<div className="q-b"><button className="q-open" onClick={open}><span className="q-t">{t}</span></button><div className="q-m">{m}</div></div>
-    <div className="q-a" onClick={stop}>{act}<svg className="q-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></div>
-  </div>;
-  const waiting = <div className="panel flush q">
-    <div className="ph"><div className="secthead"><h2>Waiting on others</h2><p>People, vendors and rules · since 18:00 yesterday</p></div></div>
-    {row("sol", <Chip tone={S.cleaning==="cancelled"?"stale":"warn"}>{S.cleaning==="cancelled"?"Cancelled":"Vendor"}</Chip>, "SOL-07 panel cleaning, ₹1,800",
-      S.cleaning==="cancelled" ? `You cancelled it at ${S.cleaningAt}, before the vendor confirmed. No charge.` : "Booked by your rule. Free to cancel until 10:00.",
-      ()=>A.open("cleaning"), S.cleaning!=="cancelled" && <button className="link sm" onClick={A.cancelCleaning}>Cancel booking</button>)}
-    {row("inv", <Chip tone="info">{S.nudged?.inv?"Asked":"Open"}</Chip>, "INV-022 temperature ticket", S.nudged?.inv?`Rahul Patil · you asked for an update at ${S.nudged.inv}`:"Rahul Patil · raised 18:30, not resolved", ()=>A.open("inv"))}
-    {row("idle", <Chip tone="line">{S.nudged?.idle?"Reminded":"2 of 4 read"}</Chip>, "Idling notices, Bhiwandi", "Sent by your rule. Effect checked tonight.", ()=>A.open("idling"))}
-  </div>;
-  const week = <div className="panel flush q">
-    <div className="ph"><div className="secthead"><h2>This week</h2><p>Worth doing. Not blocking today.</p></div></div>
-    {weekItems(S).slice(1).map(d=>row(d.id, null, d.t, d.m, ()=>A.open(d.id), <b className="est q-v">{d.v}</b>))}
+        <div className="hrow"><div className="top2"><b>Temperature ticket, INV-022</b><Chip tone="info">Open</Chip></div><span className="sm muted">Owner: Rahul Patil. Raised 18:30. Not resolved.</span></div>
+        <div className="hrow"><div className="top2"><b>Idling notices to 4 operators</b><Chip tone="line">Sent · 2 of 4 read</Chip></div><span className="sm muted">Bhiwandi. Whether idling actually dropped is checked tonight.</span></div>
+      </div>
+    </details>
   </div>;
 
-  return <div className="page today">
+  return <div className="page">
     {stale && <div className="notice warn" role="status"><span><b>Data is 3 hours old for 140 assets at Bhiwandi</b> (network outage since 05:40). Their commitments count as unverified, not ready. Trucks there need a dispatch check before a service slot can be booked.</span></div>}
     {S.mode==="failed" && <div className="notice crit"><span><b>1 action didn't go through.</b> A vendor cancelled a service slot. <button className="link" onClick={()=>A.go("track")}>See and rebook</button></span></div>}
-    {header}
-    <div className="tgrid">
-      {timeline}
-      <div className="col" style={{gap:24}}>
-        {waiting}
-        {dense ? <div className="panel"><p className="sm muted">Permit renewals, operator coaching and 3 offline devices are also waiting.</p><button className="link sm" onClick={()=>A.go("decisions")}>See all {dc} open decisions</button></div> : week}
+
+    <div className="hero">
+    <div className="head">
+      <span className="when">Thursday 8 October · 08:40 · {COMPANY}</span>
+      {dense
+        ? <p className="say">Flooding at Bhiwandi puts {R.tot.a} of today's {R.all} commitments at risk. One reroute covers 23 of them.</p>
+        : <p className="say">{R.tot.r} of today's {R.all} commitments are ready. {R.tot.a+R.tot.u} need attention before 10:00.</p>}
+      <p className="sub">{dense ? "27 trucks with deliveries today are stopped. 23 can reroute via Thane. 4 cement loads for site 12 can't wait and need a separate decision."
+        : `${R.rows[0].a} deliveries are short of a truck or driver, ${R.rows[1].a} sites are low on generator fuel, and ${R.tot.u} commitments can't be verified${stale?" because of the outage":""}.`}</p>
+    </div>
+    <div className="kpis" aria-label="Today at a glance">
+      <div className="kpi"><i className="sw r" aria-hidden="true"/><div><span>Ready</span><Num v={R.tot.r}/></div></div>
+      <div className="kpi"><i className="sw a" aria-hidden="true"/><div><span>At risk</span><Num v={R.tot.a}/></div></div>
+      <div className="kpi"><i className="sw u" aria-hidden="true"/><div><span>Unverified</span><Num v={R.tot.u}/></div></div>
+      <button className="kpi go" onClick={()=>A.go("decisions")}><i className="sw d" aria-hidden="true"/><div><span>Need you</span><Num v={decisionCount(S)}/></div></button>
+    </div>
+    </div>
+
+    <section className="ready" aria-label="Today's readiness">
+      <div className="spread"><h2>Can today run as planned?</h2><span className="faint sm">Commitments = truck departures + sites that need power today. Ready = asset, operator and schedule confirmed in the last hour.</span></div>
+      {R.rows.map(r=><ReadyBar key={r.k} row={r}/>)}
+    </section>
+
+    <div className="grid2">
+      <div className="col" style={{gap:14}}>
+        <div className="secthead"><h2>Needs you this morning</h2><p>Safety first, then by deadline.</p></div>
+
+        <article className="case crit">
+          <div className="meta"><Chip tone="crit">{inc.status==="closed"?"Closed":"Open"} · owner {inc.owner}</Chip><span>Reported 02:10 · Chakan</span></div>
+          <h3>Unexplained fuel loss on MH12-AB-1234</h3>
+          <dl className="kv sm">
+            <dt>Owner</dt><dd>{inc.owner==="You"?"You (since "+inc.ownedAt+")":"Arjun Nair, duty manager"}</dd>
+            <dt>Latest</dt><dd>Tank seal found broken at 06:10. Theft suspected, not confirmed.</dd>
+            <dt>Next</dt><dd>Reach operator Sanjay More (not answered yet), then decide on a police report.</dd>
+          </dl>
+          <div className="row"><button className="btn" onClick={()=>A.go("theft")}>Open case and contact log</button>
+            {inc.owner!=="You" && inc.status!=="closed" && <button className="btn" onClick={A.takeOwnership}>Take ownership</button>}</div>
+        </article>
+
+        {dense ? <>
+        <article className="case warn">
+          <div className="meta"><Chip tone="warn">Decide by 11:00</Chip><span>Flooding · Bhiwandi</span></div>
+          <h3>Reroute 23 trucks via Thane</h3>
+          <p className="muted sm">23 deliveries to 8 sites. +₹18,000 fuel, about +1.5 h each.{S.reroute?" Approved; Priya Shah is sending routes. Still at risk until drivers confirm.":""}</p>
+          <div className="row"><button className="btn primary" onClick={()=>A.go("decisions")}>See all {decisionCount(S)} open decisions</button></div>
+        </article>
+        <article className="case warn">
+          <div className="meta"><Chip tone="warn">Decide by 10:30</Chip><span>Separate from the 23</span></div>
+          <h3>4 cement loads for site 12 can't wait for a reroute</h3>
+          <p className="muted sm">The pour starts at 12:00; a rerouted truck would arrive about 13:30. Owner: Kavita Rao, site 12 manager.</p>
+          <div className="row"><button className="btn" onClick={()=>A.go("decisions")}>See options</button></div>
+        </article></> : <>
+        <article className="case warn">
+          <div className="meta"><Chip tone="warn">Before 09:30</Chip><span>{R.rows[0].a} deliveries · dispatch</span></div>
+          <h3>{R.rows[0].a} deliveries are short of a truck or driver</h3>
+          <p className="muted sm">5 trucks failed their morning check and 3 drivers called in sick. 4 standby trucks are free at Bhiwandi.</p>
+          {S.dispatchAssigned
+            ? <div className="notice info sm"><span><b>Assigned to Priya Shah (dispatch lead) at {S.dispatchAt}.</b> 0 of 8 replacements confirmed. These stay "at risk" until she confirms each one.</span></div>
+            : <div className="row"><button className="btn primary" onClick={A.assignDispatch}>Assign to Priya Shah, dispatch</button></div>}
+        </article>
+
+        <article className="case warn">
+          <div className="meta"><Chip tone="warn">Before 10:00</Chip><span>{R.rows[1].a} sites · site power</span></div>
+          <h3>{R.rows[1].a} sites have less than 6 hours of generator fuel</h3>
+          <div className="receipt sm">
+            <span>Diesel: {FUEL.litresPerSite} L × {FUEL.siteCount} sites (about 18 more hours each)</span><span className="r">{FUEL.litres} L</span>
+            <span>At ₹{FUEL.price}/L (assumed price)</span><span className="r">{inr(FUEL.fuelCost)}</span>
+            <span>Tanker delivery charge</span><span className="r">{inr(FUEL.delivery)}</span>
+            <span className="tot">Total payment</span><span className="r tot">{inr(FUEL.total)}</span>
+          </div>
+          {S.fuel==="none"
+            ? <div className="row"><button className="btn primary" onClick={A.approveFuel}>Approve {inr(FUEL.total)} refuel</button><button className="btn ghost" onClick={()=>A.openAsk("fuel")}>Ask why</button></div>
+            : <div className="notice info sm"><span><b>Approved {inr(FUEL.total)} at {S.fuelAt}.</b> {S.fuel==="requested"?"Waiting for Bharat Fuels to confirm the tanker.":"Bharat Fuels confirmed: arriving about 11:30."} Owner: Meera Joshi. Sites {FUEL.sites} stay at risk until fuel sensors confirm the delivery.</span></div>}
+        </article>
+
+        <article className="case">
+          <div className="meta"><Chip tone="stale">Can't verify</Chip><span>{R.tot.u} commitments</span></div>
+          <h3>{R.tot.u} commitments have no fresh data</h3>
+          <p className="muted sm">{stale ? `${R.rows[0].u} departures (Bhiwandi network outage since 05:40) and ${R.rows[1].u} sites.` : `${R.rows[0].u} departures in the Kasara ghat low-network corridor and ${R.rows[1].u} sites whose generators went offline in a power cut at 04:00.`} Missing data doesn't mean an asset has stopped.</p>
+          <div className="row"><button className="link sm" onClick={()=>A.go("assets")}>See which ones</button></div>
+        </article></>}
+      </div>
+
+      <div className="col" style={{gap:14}}>
+        {handover}
+        {!dense && <div className="panel flush">
+          <div className="ph"><div className="secthead"><h2>Planned improvements</h2><p>This week. Not blocking today.</p></div></div>
+          {weekItems(S).map((d,i)=>
+            <button key={i} className="item button" onClick={()=>i===0?A.go(d.to):A.toast("Not built in this prototype.")}>
+              <div><div className="t">{d.t}</div><div className="m">{d.m}{i>0?" · details not in prototype":""}</div></div>
+              <div className="n"><b className="est">{d.v}</b><span className="faint xs">{d.when}</span></div>
+            </button>)}
+        </div>}
       </div>
     </div>
     <p className="footnote">All figures are illustrative. Readiness assumes the dispatch plan and site schedules are connected. The decisions badge counts items waiting for your decision; safety incidents have their own owner and are shown separately.</p>
@@ -881,134 +817,12 @@ function clutchLine(S){
   const p = shownPlan(S);
   const m = S.pstatus==="snoozed" ? "Snoozed until Mon 12 Oct" : S.pstatus==="dismissed" ? "You disagreed · won't return unless evidence changes"
     : S.pstatus==="approved" ? (S.partial ? `Approved for ${p.n} trucks · ${S.partial} still need a slot` : `Approved for ${p.n} trucks · in progress`) : "Decide by today, 17:00, so vendors can confirm before the first slot on Fri 9 Oct";
-  return {id:"clutch", t:`Service ${p.n} trucks for early clutch wear`, m, v:`Est. ${lakh(p.net)} net benefit`, when:`Cost ${inr(p.cost)}`, to: S.pstatus==="approved"?"track":"proposal"};
+  return {t:`Service ${p.n} trucks for early clutch wear`, m, v:`Est. ${lakh(p.net)} net benefit`, when:`Cost ${inr(p.cost)}`, to: S.pstatus==="approved"?"track":"proposal"};
 }
 function weekItems(S){
   return [clutchLine(S),
-    {id:"dg", t:"Generator DG-118, Hinjewadi: fuel use up 18%", m:S.dg?`Inspection approved at ${S.dg} · Rahul Patil booking`:"Likely injector wear. Inspection ₹3,500", v:"Est. ₹22k/mo", when:"Needs approval"},
-    {id:"solar", t:"6 solar stations producing 14% below forecast", m:S.solar?`Cleaning approved at ${S.solar} · Sat 10 Oct`:"Dust after the dry spell. Cleaning ₹12,000", v:"Est. ₹40k/mo", when:"Vendor free Sat"}];
-}
-
-/* ============ Detail pages: context and proof behind each Today card ============ */
-const Ev = ({k="sup", t, src}) => <div className="ev"><span className={"mk "+k}>{k==="sup"?"+":k==="mis"?"?":"~"}</span><div>{t}<div className="src">{src}</div></div></div>;
-function detailOf(S, A, id){
-  const done = (txt) => <div className="notice info sm"><span>{txt}</span></div>;
-  switch(id){
-  case "dispatch": return {
-    title:"8 deliveries short of a truck or driver", parent:"today",
-    chips:[<Chip tone="warn">Before 09:30</Chip>, <Chip tone={S.dispatchAssigned?"info":"line"}>{S.dispatchAssigned?"Owner Priya Shah":"No owner yet"}</Chip>],
-    lede:"First of these departs at 09:45. Dispatch needs about 15 minutes to swap a truck or driver, so a decision by 09:30 keeps every slot.",
-    say:"Standby trucks and relief drivers cover 6 of the 8. 2 need a hired truck or a later slot.",
-    unsure:<><b>Standby MH04-SB-207's morning check is 50 minutes old.</b> If it fails a recheck, 3 deliveries need a hired truck instead of 2.</>,
-    evidence:[["sup","5 trucks failed the morning check: brakes 2, tyres 2, battery 1","Strong · pre-trip check app · 06:30–07:40"],["sup","3 drivers called in sick","Strong · HR roster · 07:15"],["sup","4 standby trucks at Bhiwandi passed their checks","Fresh · telematics · 08:20"],["alt","2 relief drivers from the night shift are within legal hours","Roster rule · drive-time limits"]],
-    table:{head:["Delivery","Departs","Short of","Proposed cover"], rows:[["Site 3 · steel","09:45","Truck","Standby MH04-SB-201"],["Site 5 · sand","10:00","Driver","Relief: Nitin Gaikwad"],["Site 9 · blocks","10:15","Truck","Standby MH04-SB-204"],["Site 14 · steel","10:30","Truck","Standby MH04-SB-207"],["Site 21 · sand","11:00","Driver","Relief: Sameer Kulkarni"],["Site 30 · cement","11:15","Truck","Standby MH04-SB-210"],["Site 33 · blocks","12:00","Driver","Needs a hired truck"],["Site 8 · steel","12:30","Truck","Needs a hired truck or later slot"]]},
-    log:[["06:30","5 trucks failed their pre-trip check"],["07:15","3 drivers marked sick on the roster"],["08:20","Standby trucks at Bhiwandi rechecked"], S.dispatchAssigned && ["You", `${S.dispatchAt} · assigned to Priya Shah`]],
-    act: S.dispatchAssigned ? done(<><b>Assigned to Priya Shah (dispatch lead) at {S.dispatchAt}.</b> 0 of 8 replacements confirmed. These stay "at risk" until she confirms each one.</>)
-      : <div className="row"><button className="btn primary" onClick={A.assignDispatch}>Assign to Priya Shah, dispatch</button></div>,
-    sources:"Pre-trip check app, HR roster, telematics, dispatch plan. Delivery IDs are illustrative."};
-  case "fuel": return {
-    title:`${FUEL.siteCount} sites have less than 6 hours of generator fuel`, parent:"today",
-    chips:[<Chip tone="warn">Before 10:00</Chip>, <Chip tone="line">Within your ₹50,000 limit</Chip>],
-    lede:`Sites ${FUEL.sites} have run on generators since the Nashik grid went down at 04:00. A tanker ordered by 10:00 arrives about 11:30, before the first site runs dry.`,
-    say:"Without a refuel, site 12 runs dry at about 12:30 and the other two by 14:00.",
-    unsure:<><b>No grid return time from MSEDCL yet.</b> If power returns before 11:00, site 19 may not need fuel today (₹14,100 of the total).</>,
-    evidence:[["sup","Grid supply at Nashik down since 04:00","Strong · grid status feed · 08:30"],["sup","Generators ran all night at 70–80% load","Strong · generator fuel sensors · 08:30"],["sup","Burn rates match each generator's own 30-day baseline","Model check · no sensor drift"],["alt","Site 19's fuel sensor was recalibrated in September","Older readings less reliable"]],
-    table:{head:["Site","Fuel left","Load","Runs dry"], rows:[["Site 12","22%","78%","≈ 12:30"],["Site 19","31%","70%","≈ 14:00"],["Site 27","28%","74%","≈ 13:30"]]},
-    receipt:[[`Diesel: ${FUEL.litresPerSite} L × ${FUEL.siteCount} sites (about 18 more hours each)`, `${FUEL.litres} L`],[`At ₹${FUEL.price}/L (assumed price)`, inr(FUEL.fuelCost)],["Tanker delivery charge", inr(FUEL.delivery)],["Total payment", inr(FUEL.total), true]],
-    log:[["04:00","Grid supply lost at Nashik"],["08:30","Fuel sensors read below 6 hours at 3 sites"], S.fuel!=="none" && ["You",`${S.fuelAt} · approved ${inr(FUEL.total)}`], S.fuel==="confirmed" && ["Vendor","Bharat Fuels confirmed · arriving about 11:30"]],
-    act: S.fuel==="none" ? <div className="row"><button className="btn primary" onClick={A.approveFuel}>Approve {inr(FUEL.total)} refuel</button><button className="btn ghost" onClick={()=>A.openAsk("fuel")}>Ask why</button></div>
-      : done(<><b>Approved {inr(FUEL.total)} at {S.fuelAt}.</b> {S.fuel==="requested"?"Waiting for Bharat Fuels to confirm the tanker.":"Bharat Fuels confirmed: arriving about 11:30."} Owner: Meera Joshi. Sites {FUEL.sites} stay at risk until fuel sensors confirm the delivery.</>),
-    sources:"Generator fuel sensors, site load, grid status feed, Bharat Fuels rate card. Prices are assumptions."};
-  case "cleaning": return {
-    title:"Panel cleaning for SOL-07", parent:"today",
-    chips:[<Chip tone={S.cleaning==="cancelled"?"stale":"warn"}>{S.cleaning==="cancelled"?"Cancelled":"Waiting for vendor"}</Chip>, <Chip tone="line">Booked by a rule</Chip>],
-    lede:"Your rule \"Book panel cleaning under ₹5,000\" booked this at 20:05. It costs ₹1,800, so it didn't need your approval. Owner: Meera Joshi, site power.",
-    say:"Dust is the likely cause: output is down on clear days only, and the neighbouring station is normal.",
-    unsure:<><b>Haze is forecast for Saturday.</b> If output stays low after cleaning, the inverter is checked next.</>,
-    evidence:[["sup","Output 22% below forecast for 3 clear days","Strong · station inverter + weather feed"],["sup","Last cleaned 41 days ago (usual: every 30)","Maintenance log"],["sup","SOL-08, 2 km away, is on forecast","Rules out weather"],["mis","No panel camera at this station","Missing source"]],
-    table:{head:["Rule check","Limit","This booking"], rows:[["Spend per action","₹5,000","₹1,800"],["Asset type","Solar stations","SOL-07"],["Safety case","Never","No"]]},
-    log:[["20:05","Rule requested cleaning from Sunrise Solar Care"],["10:00","Vendor must confirm; free to cancel until then"], S.cleaning==="cancelled" && ["You",`${S.cleaningAt} · cancelled, no charge`]],
-    act: S.cleaning==="cancelled" ? done(<>You cancelled it at {S.cleaningAt}, before the vendor confirmed. No charge.</>)
-      : <div className="row"><button className="btn" onClick={A.cancelCleaning}>Cancel booking</button><button className="btn ghost" onClick={()=>A.go("rules")}>See the rule</button></div>,
-    sources:"Station inverter, weather feed, maintenance log."};
-  case "inv": return {
-    title:"Temperature ticket, INV-022", parent:"today",
-    chips:[<Chip tone="info">Open</Chip>, <Chip tone="line">Owner Rahul Patil</Chip>],
-    lede:"Raised by a rule at 18:30 yesterday after INV-022 at site 14 ran above its temperature limit. Not a safety risk yet; the inverter derates itself above 85°C.",
-    say:"The cooling fan is the likely fault, not overload.",
-    unsure:<><b>No technician visit is booked yet.</b> Afternoon heat today may push it past 85°C, which halves its output.</>,
-    evidence:[["sup","Heat-sink at 78°C for 40 min (limit 70°C)","Strong · inverter sensor · 17:50"],["sup","Fan current 30% below normal since Tuesday","Inverter sensor"],["alt","Load was normal, so overload is unlikely","Site load meter"]],
-    log:[["17:50","Temperature passed 70°C"],["18:30","Rule raised a ticket to Rahul Patil"], S.nudged?.inv && ["You",`${S.nudged.inv} · asked Rahul for an update`]],
-    act: S.nudged?.inv ? done(<>You asked Rahul Patil for an update at {S.nudged.inv}. He'll reply in the ticket.</>)
-      : <div className="row"><button className="btn" onClick={()=>A.nudge("inv","Asked Rahul Patil for an update on INV-022","Ticket open since 18:30")}>Ask Rahul for an update</button></div>,
-    sources:"Inverter temperature and fan sensors, site load meter."};
-  case "idling": return {
-    title:"Idling notices to 4 operators, Bhiwandi", parent:"today",
-    chips:[<Chip tone="line">2 of 4 read</Chip>, <Chip tone="line">Sent by a rule</Chip>],
-    lede:"Your rule \"Tell operators when idling passes 45 min\" sent these at 21:40. Whether idling actually dropped is checked tonight.",
-    say:"Most idling happens while trucks wait at loading bay 3, not on the road.",
-    unsure:<><b>A notice may not fix a queue.</b> If idling doesn't drop, the loading schedule is the next thing to change.</>,
-    evidence:[["sup","4 trucks idled 47–72 min yesterday","Strong · engine data"],["sup","All 4 were within 200 m of bay 3","GPS"],["alt","Idling explains about 62% of this month's 8% fuel rise","Fuel analysis"]],
-    table:{head:["Operator","Idling","Notice"], rows:[["Ramesh Pawar","72 min","Read"],["Imran Shaikh","58 min","Read"],["Deepak Jadhav","51 min","Not read"],["Vinod Kale","47 min","Not read"]]},
-    log:[["21:40","Rule sent 4 notices"],["Tonight","Check whether idling dropped"], S.nudged?.idle && ["You",`${S.nudged.idle} · reminded 2 operators`]],
-    act: <div className="row">{S.nudged?.idle ? <Chip tone="info">Reminded at {S.nudged.idle}</Chip> : <button className="btn" onClick={()=>A.nudge("idle","Reminded 2 operators about idling notices","Not read yet")}>Remind the 2 who haven't read it</button>}<button className="btn ghost" onClick={()=>A.openAsk("fuelcost")}>Why is fuel cost up?</button></div>,
-    sources:"Engine data, GPS, notification read receipts."};
-  case "dg": return {
-    title:"Generator DG-118, Hinjewadi: fuel use up 18%", parent:"today",
-    chips:[<Chip tone="line">This week</Chip>, <Chip tone="line">No rule covers it</Chip>],
-    lede:"DG-118 is using 18% more diesel per unit of power than its own 30-day baseline. An inspection costs ₹3,500.",
-    say:"Injector wear is the likely cause.",
-    unsure:<><b>Load also rose 4% this month.</b> That explains part of the increase; about 14 of the 18 points are unexplained.</>,
-    evidence:[["sup","Diesel per kWh up 18% over 21 days","Strong · fuel sensor + energy meter"],["sup","Exhaust temperature up 6%","Generator controller"],["sup","1,900 hours since injector service (interval 1,500)","Maintenance log"],["alt","Load up 4%","Site load meter"]],
-    receipt:[["Inspection, Om Motors","₹3,500"],["Extra diesel now, per month","≈ ₹26,000"],["Expected saving if injectors fixed, per month","≈ ₹22,000", true]],
-    log:[["21 days","Fuel use started rising"], S.dg && ["You",`${S.dg} · approved inspection`]],
-    act: S.dg ? done(<>Inspection approved at {S.dg}. Rahul Patil is booking Om Motors.</>)
-      : <div className="row"><button className="btn primary" onClick={()=>A.approveWeek("dg","Approved ₹3,500 inspection for DG-118","Fuel use up 18%")}>Approve ₹3,500 inspection</button></div>,
-    sources:"Fuel sensor, energy meter, generator controller, maintenance log. Savings are estimates."};
-  case "solar": return {
-    title:"6 solar stations producing 14% below forecast", parent:"today",
-    chips:[<Chip tone="line">This week</Chip>, <Chip tone="line">Above the rule's ₹5,000 limit</Chip>],
-    lede:"After 19 dry days, 6 stations are under forecast on clear days. Cleaning all 6 costs ₹12,000, so it needs you rather than the rule.",
-    say:"Dust is the likely cause at all 6.",
-    unsure:<><b>Rain is possible next week</b> and would clean some panels for free. Waiting costs about ₹1,300 a day.</>,
-    evidence:[["sup","Output 11–17% below forecast on clear days","Strong · station inverters + weather"],["sup","0 mm rain in 19 days","Weather feed"],["alt","SOL-07 is booked separately by your rule","Not counted here"]],
-    table:{head:["Station","Below forecast","Last cleaned"], rows:[["SOL-03","17%","44 days"],["SOL-11","16%","39 days"],["SOL-14","15%","41 days"],["SOL-19","13%","36 days"],["SOL-22","12%","35 days"],["SOL-31","11%","33 days"]]},
-    receipt:[["Cleaning: 6 stations × ₹2,000","₹12,000"],["Lost output now, per month","≈ ₹40,000", true]],
-    log:[["19 days","No rain"], S.solar && ["You",`${S.solar} · approved cleaning for Sat 10 Oct`]],
-    act: S.solar ? done(<>Cleaning approved at {S.solar}. Sunrise Solar Care, Sat 10 Oct.</>)
-      : <div className="row"><button className="btn primary" onClick={()=>A.approveWeek("solar","Approved ₹12,000 cleaning for 6 solar stations","14% below forecast")}>Approve ₹12,000, Sat 10 Oct</button></div>,
-    sources:"Station inverters, weather feed, maintenance log. Station IDs are illustrative."};
-  }
-  return null;
-}
-function Detail({S, A}){
-  const d = detailOf(S, A, S.detail);
-  if(!d) return <div className="page"><p>Nothing to show.</p></div>;
-  return <div className="page detail">
-    <div className="col" style={{gap:10}}>
-      <div className="row">{d.chips.map((c,i)=><React.Fragment key={i}>{c}</React.Fragment>)}</div>
-      <h1>{d.title}</h1>
-      <p className="muted" style={{maxWidth:"72ch"}}>{d.lede}</p>
-    </div>
-    <div className="conclusion">
-      <div className="col" style={{gap:4}}><span className="k">What we think</span><p className="say s">{d.say}</p></div>
-      <div className="col" style={{gap:4}}><span className="k">Main uncertainty</span><p className="sm">{d.unsure}</p></div>
-    </div>
-    <div className="grid2">
-      <div className="col" style={{gap:24}}>
-        <div className="panel"><h2>Proof</h2>{d.evidence.map((e,i)=><Ev key={i} k={e[0]} t={e[1]} src={e[2]}/>)}</div>
-        {d.table && <div className="panel flush"><div className="tw"><table><thead><tr>{d.table.head.map(h=><th key={h}>{h}</th>)}</tr></thead><tbody>{d.table.rows.map((r,i)=><tr key={i}>{r.map((c,j)=><td key={j}>{c}</td>)}</tr>)}</tbody></table></div></div>}
-      </div>
-      <div className="col" style={{gap:24}}>
-        <div className="panel"><h2>Act</h2>
-          {d.receipt && <div className="receipt sm">{d.receipt.map((r,i)=><React.Fragment key={i}><span className={r[2]?"tot":""}>{r[0]}</span><span className={"r"+(r[2]?" tot":"")}>{r[1]}</span></React.Fragment>)}</div>}
-          {d.act}
-        </div>
-        <div className="panel"><h2>What happened</h2><div className="tl">{d.log.filter(Boolean).map((l,i)=><div key={i}><span className="t">{l[0]}</span>{l[1]}</div>)}</div></div>
-      </div>
-    </div>
-    <p className="footnote">Sources: {d.sources} All figures are illustrative.</p>
-  </div>;
+    {t:"Generator DG-118, Hinjewadi: fuel use up 18%", m:"Likely injector wear. Inspection ₹3,500", v:"Est. ₹22,000/mo", when:"Above rule limit"},
+    {t:"6 solar stations producing 14% below forecast", m:"Dust after the dry spell. Cleaning ₹12,000", v:"Est. ₹40,000/mo", when:"Vendor free Sat"}];
 }
 
 /* ============ Proposal ============ */
@@ -1376,9 +1190,9 @@ function Decisions({S, A}){
     : <>
       <div className="panel flush"><div className="ph"><h2>This morning</h2></div>
         {D.morning.length===0 && <div className="item"><div className="m">Nothing waiting for you. Assigned and approved items are tracked on Today until they're confirmed.</div></div>}
-        {D.morning.map(x=><button key={x.id} className="item button" onClick={()=>A.open(x.id)}><div><div className="t">{x.id==="dispatch"?"8 deliveries short of a truck or driver":"3 sites low on generator fuel"}</div><div className="m">{x.id==="dispatch"?"Assign replacements before 09:30":`Refuel ${inr(FUEL.total)} before 10:00`}</div></div><div className="n"><span className="faint xs">See evidence</span></div></button>)}</div>
+        {D.morning.map(x=><button key={x.id} className="item button" onClick={()=>A.go("today")}><div><div className="t">{x.id==="dispatch"?"8 deliveries short of a truck or driver":"3 sites low on generator fuel"}</div><div className="m">{x.id==="dispatch"?"Assign replacements before 09:30":`Refuel ${inr(FUEL.total)} before 10:00`}</div></div><div className="n"><span className="faint xs">Act on Today</span></div></button>)}</div>
       <div className="panel flush"><div className="ph"><h2>This week</h2></div>
-        {weekItems(S).map((d,i)=><button key={i} className="item button" onClick={()=>i===0?A.go(d.to):A.open(d.id)}><div><div className="t">{d.t}</div><div className="m">{d.m}</div></div><div className="n"><b className="est">{d.v}</b><span className="faint xs">{d.when}</span></div></button>)}</div>
+        {weekItems(S).map((d,i)=><button key={i} className="item button" onClick={()=>i===0?A.go(d.to):A.toast("Not built in this prototype.")}><div><div className="t">{d.t}</div><div className="m">{d.m}{i>0?" · details not in prototype":""}</div></div><div className="n"><b className="est">{d.v}</b><span className="faint xs">{d.when}</span></div></button>)}</div>
     </>}
   </div>;
 }
@@ -1526,8 +1340,8 @@ function Num({v}){
   return <b aria-label={String(v)}>{n}</b>;
 }
 const NAV = [["today","Today"],["decisions","Needs your decision"],["assets","Assets"],["rules","Automation rules"],["activity","Activity"]];
-const TITLES = {today:"Today",proposal:"Proposal",evidence:"Evidence",review:"Review and approve",track:"Clutch service",rule:"New automation rule",decisions:"Needs your decision",assets:"Assets",rules:"Automation rules",activity:"Activity",theft:"Urgent case",detail:"Details"};
-const PARENT = {proposal:"decisions",evidence:"proposal",review:"proposal",track:"decisions",rule:"rules",theft:"decisions",detail:"today"};
+const TITLES = {today:"Today",proposal:"Proposal",evidence:"Evidence",review:"Review and approve",track:"Clutch service",rule:"New automation rule",decisions:"Needs your decision",assets:"Assets",rules:"Automation rules",activity:"Activity",theft:"Urgent case"};
+const PARENT = {proposal:"decisions",evidence:"proposal",review:"proposal",track:"decisions",rule:"rules",theft:"decisions"};
 
 function approvedSnapshot(list, v){ const f=figures(list); return {...f, list, vendor:`${v.name}, ${v.loc}`, price:v.price, pay:list.length*v.price}; }
 function ensureApproved(s){
@@ -1581,9 +1395,6 @@ function App(){
     go, set, toast, narrow,
     modal: m => setModal(m),
     openAsk: k => setAskOpen(k||""),
-    open: id => { set({screen:"detail", detail:id}); window.scrollTo({top:0}); },
-    nudge: (id, what, why) => { act("You", what, why, (s,t)=>({nudged:{...s.nudged,[id]:t}})); toast("Sent. You'll see the reply in Activity."); },
-    approveWeek: (id, what, why) => { act("You", what, why, (s,t)=>({[id]:t})); toast("Approved. Rahul Patil is booking it."); },
     cancelCleaning: () => act("You","Cancelled panel cleaning for SOL-07 before vendor confirmation","No charge",(s,t)=>({cleaning:"cancelled", cleaningAt:t})),
     assignDispatch: () => act("You","Assigned 8 at-risk deliveries to Priya Shah","Readiness unchanged until she confirms",(s,t)=>({dispatchAssigned:true, dispatchAt:t})),
     approveFuel: () => act("You",`Approved ${inr(FUEL.total)} refuel for sites ${FUEL.sites} (${FUEL.litres} L)`,"Sites stay at risk until delivery is confirmed",(s,t)=>({fuel:"requested", fuelAt:t})),
@@ -1611,7 +1422,7 @@ function App(){
 
   const dc = decisionCount(S);
   const navKey = PARENT[S.screen] && !NAV.find(n=>n[0]===S.screen) ? PARENT[S.screen] : S.screen;
-  const Screen = {today:Today, proposal:Proposal, evidence:Evidence, review:Review, track:Track, rule:RuleScreen, decisions:Decisions, theft:Theft, detail:Detail, assets:Assets, rules:Rules, activity:Activity}[S.screen];
+  const Screen = {today:Today, proposal:Proposal, evidence:Evidence, review:Review, track:Track, rule:RuleScreen, decisions:Decisions, theft:Theft, assets:Assets, rules:Rules, activity:Activity}[S.screen];
 
   return <div className="app v5">
     <header className="hdr">
@@ -1629,7 +1440,7 @@ function App(){
     </nav>
     <div className="main">
       <div className="top">
-        <div className="crumbs">{PARENT[S.screen] && <><button onClick={()=>go(PARENT[S.screen])}>{TITLES[PARENT[S.screen]]}</button><span>/</span></>}<span style={{color:"var(--ink)"}}>{S.screen==="detail" ? (detailOf(S,A,S.detail)||{}).title : TITLES[S.screen]}</span></div>
+        <div className="crumbs">{PARENT[S.screen] && <><button onClick={()=>go(PARENT[S.screen])}>{TITLES[PARENT[S.screen]]}</button><span>/</span></>}<span style={{color:"var(--ink)"}}>{TITLES[S.screen]}</span></div>
       </div>
       {S.mode!=="normal" && <div className="scenario" role="note">Independent scenario · reset to the initial plan. It doesn't continue from the main story.</div>}
       <Screen S={S} A={A}/>

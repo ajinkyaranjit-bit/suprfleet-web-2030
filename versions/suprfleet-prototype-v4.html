@@ -285,6 +285,7 @@ details.fold[open] > summary::after{content:"Hide"}
 /* v4 visual layer: soft grey canvas, white rounded cards, black active tab, orange brand.
    Behaviour, copy and status colours are unchanged from v3.2. */
 :root{
+  color-scheme:light;
   --canvas:#E6E6E6; --frame:#F3F3F3;
   --paper:#F3F3F3; --surface:#FFFFFF; --sunk:#F2F2F2; --ink:#111214; --ink2:#55595F; --ink3:#8A8E94; --line:#ECECEC; --line2:#DEDEDE;
   --accent:#111214; --accent-ink:#FFFFFF; --accent-soft:#F0F0F0;
@@ -478,6 +479,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.25.6/babel.min.js"></script>
+<script>document.documentElement.setAttribute("data-theme","light");</script>
 <script type="text/babel" data-presets="react">
 const {useState, useEffect, useRef} = React;
 

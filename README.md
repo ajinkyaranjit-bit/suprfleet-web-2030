@@ -16,8 +16,8 @@ The core flow: **Today → Proposal → Evidence → Approve → Track → Autom
 
 | Path | What it is |
 |---|---|
-| `index.html` | Prototype v5: same flows as v3.2 with a refreshed visual layer (frosted glass, navy, motion) |
-| `versions/` | Earlier versions kept for history: v1, v2, v3, v3.2 (the version shown in the presentation deck), v4, and the first thinking board |
+| `index.html` | Prototype v5.1: v5's visual layer with a redesigned Today page (one-line readiness header, a "Your move" timeline, "Waiting on others" and "This week" lists) and a detail page with evidence behind every Today card |
+| `versions/` | Earlier versions kept for history: v1, v2, v3, v3.2 (the version shown in the presentation deck), v4, v5.0, and the first thinking board |
 
 ## Notes
 
